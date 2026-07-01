@@ -6,37 +6,16 @@ const { encrypt } = require("./cryptoUtils");
 const { getDbConfig } = require("./db");
 const pgConfig = getDbConfig();
 
-if (!process.env.DATABASE_URL && !process.env.PG_CONNECTION_STRING && !process.env.DB_HOST && !process.env.PGHOST) {
-  console.warn("[DB] DATABASE_URL is not set. Database initialization will use local defaults if available.");
+if (!process.env.DATABASE_URL && !process.env.PG_CONNECTION_STRING && !process.env.DB_HOST && !process.env.PGHOST && process.env.NODE_ENV === "production") {
+  console.error("[DB] Missing DATABASE_URL in production. Set DATABASE_URL before running database initialization.");
+  process.exit(1);
 }
 
 async function init() {
-  // 1. Connect to default postgres database to create tsms_db
-  let client = new Client({ ...pgConfig, database: "postgres" });
+  const client = new Client(pgConfig);
   try {
     await client.connect();
-    console.log("[DB] Connected to default postgres database.");
-    
-    // Check if tsms_db exists
-    const res = await client.query("SELECT 1 FROM pg_database WHERE datname = 'tsms_db'");
-    if (res.rowCount === 0) {
-      await client.query("CREATE DATABASE tsms_db");
-      console.log("[DB] Database 'tsms_db' created successfully.");
-    } else {
-      console.log("[DB] Database 'tsms_db' already exists.");
-    }
-  } catch (err) {
-    console.error("[DB] Error creating database:", err);
-    process.exit(1);
-  } finally {
-    await client.end();
-  }
-
-  // 2. Connect to tsms_db to create tables
-  client = new Client({ ...pgConfig, database: "tsms_db" });
-  try {
-    await client.connect();
-    console.log("[DB] Connected to 'tsms_db' database.");
+    console.log("[DB] Connected to configured PostgreSQL database.");
 
     // Drop tables to enforce password hashing reset
     await client.query(`DROP TABLE IF EXISTS incidents CASCADE`);

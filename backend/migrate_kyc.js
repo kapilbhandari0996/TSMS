@@ -3,6 +3,11 @@ const { getDbConfig } = require("./db");
 
 const pgConfig = getDbConfig();
 
+if (!process.env.DATABASE_URL && !process.env.PG_CONNECTION_STRING && !process.env.DB_HOST && !process.env.PGHOST && process.env.NODE_ENV === "production") {
+  console.error("[DB] Missing DATABASE_URL in production. Set DATABASE_URL before running migrations.");
+  process.exit(1);
+}
+
 async function migrate() {
   const client = new Client(pgConfig);
   try {

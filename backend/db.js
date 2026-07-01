@@ -7,6 +7,16 @@ function isProductionEnvironment() {
     process.env.VERCEL === "true";
 }
 
+function getLocalFallbackConfig() {
+  return {
+    host: "localhost",
+    user: "postgres",
+    password: "kapil123",
+    database: "tsms_db",
+    port: 5432,
+  };
+}
+
 function parseDatabaseUrl(connectionString) {
   try {
     const parsed = new URL(connectionString);
@@ -27,10 +37,10 @@ function buildDbConfig() {
   const connectionString = process.env.DATABASE_URL || process.env.PG_CONNECTION_STRING;
   const isProd = isProductionEnvironment();
   const envConfig = {
-    host: process.env.DB_HOST || process.env.PGHOST || undefined,
-    user: process.env.DB_USER || process.env.PGUSER || undefined,
-    password: process.env.DB_PASSWORD || process.env.PGPASSWORD || undefined,
-    database: process.env.DB_NAME || process.env.PGDATABASE || undefined,
+    host: process.env.DB_HOST || process.env.PGHOST || (isProd ? undefined : "localhost"),
+    user: process.env.DB_USER || process.env.PGUSER || (isProd ? undefined : "postgres"),
+    password: process.env.DB_PASSWORD || process.env.PGPASSWORD || (isProd ? undefined : "kapil123"),
+    database: process.env.DB_NAME || process.env.PGDATABASE || (isProd ? undefined : "tsms_db"),
     port: Number(process.env.DB_PORT || process.env.PGPORT || 5432),
   };
 
@@ -40,22 +50,24 @@ function buildDbConfig() {
   if (connectionString) {
     const parsed = parseDatabaseUrl(connectionString);
     config = parsed ? { connectionString, ...parsed, password: parsed.password || "" } : { connectionString, password: "" };
-  } else if (hasEnvConfig || !isProd) {
+  } else if (hasEnvConfig) {
     config = { ...envConfig };
     if (config.port) {
       config.port = Number(config.port);
     }
+  } else if (!isProd) {
+    config = { ...envConfig };
+    console.log("[DB] No DATABASE_URL or DB_* values detected. Using local PostgreSQL defaults for development.");
   } else {
-    console.warn("[DB] DATABASE_URL is not set. Configure DATABASE_URL or DB_HOST/DB_USER/DB_NAME/DB_PASSWORD for production database access.");
-  }
-
-  if (connectionString || isProd) {
-    config.ssl = { rejectUnauthorized: false };
+    console.error("[DB] Missing DATABASE_URL in production. Set DATABASE_URL (or DB_HOST/DB_USER/DB_NAME/DB_PASSWORD) before starting the backend.");
+    process.exit(1);
   }
 
   if (!connectionString && !hasEnvConfig && !isProd) {
-    console.log("[DB] No DATABASE_URL or DB_* values detected. Falling back to local PostgreSQL defaults for development.");
+    config = getLocalFallbackConfig();
   }
+
+  config.ssl = isProd ? { rejectUnauthorized: false } : false;
 
   return config;
 }

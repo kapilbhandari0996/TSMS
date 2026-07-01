@@ -14,24 +14,7 @@ node init_db.js
 npm start
 ```
 
-## 🔐 Environment Configuration
-
-Create a file named `.env` in the backend directory before starting the server:
-
-```env
-# Backend authentication
-JWT_SECRET=replace_with_a_long_random_string
-
-# Encryption key for sensitive tourist data (must be 32 characters)
-FIELD_ENCRYPTION_KEY=12345678901234567890123456789012
-```
-
-Notes:
-- `JWT_SECRET` is used to sign and verify authentication tokens.
-- `FIELD_ENCRYPTION_KEY` is used for encrypting sensitive fields such as passport and visa information.
-- Keep these values private and do not commit the `.env` file to source control.
-
-## 🛠️ Features
+## ️ Features
 
 - **Secure Authentication & Data Privacy**: Passwords are cryptographically hashed using `bcrypt`, and sensitive API routes are strictly protected by **JSON Web Tokens (JWT)** for both tourists and administrators.
 - **AI-Driven Anomaly Detection**: A background AI rules engine constantly monitors check-in activity and triggers, actively flagging panic spam and prolonged periods of inactivity (e.g. failing to update status while hiking).
