@@ -3,12 +3,12 @@ const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const { encrypt } = require("./cryptoUtils");
-const pgConfig = {
-  host: "localhost",
-  user: "postgres",
-  password: "kapil123",
-  port: 5432
-};
+const { getDbConfig } = require("./db");
+const pgConfig = getDbConfig();
+
+if (!process.env.DATABASE_URL && !process.env.PG_CONNECTION_STRING && !process.env.DB_HOST && !process.env.PGHOST) {
+  console.warn("[DB] DATABASE_URL is not set. Database initialization will use local defaults if available.");
+}
 
 async function init() {
   // 1. Connect to default postgres database to create tsms_db

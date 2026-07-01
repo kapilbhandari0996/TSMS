@@ -5,7 +5,6 @@ const WebSocket = require("ws");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const { Pool } = require("pg");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const { runFullVerification } = require("./ocrModule");
@@ -14,6 +13,7 @@ const { encrypt, decrypt } = require("./cryptoUtils");
 const { logAudit } = require("./auditLogger");
 const { generateToken, verifyToken, requireRole } = require("./authMiddleware");
 const { startAnomalyEngine, setBroadcastCallback } = require("./anomalyEngine");
+const { pool } = require("./db");
 
 const PORT = 3001;
 const UPLOADS_DIR = path.join(__dirname, "uploads", "kyc");
@@ -22,22 +22,6 @@ const UPLOADS_DIR = path.join(__dirname, "uploads", "kyc");
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
-
-// --- INITIALIZE DATABASE CONNECTION ---
-const pool = new Pool({
-  host: "localhost",
-  user: "postgres",
-  password: "kapil123",
-  database: "tsms_db",
-  port: 5432
-});
-
-pool.on("connect", () => {
-  console.log("[DB] Connected to PostgreSQL database 'tsms_db'.");
-});
-pool.on("error", (err) => {
-  console.error("[DB] Unexpected database error:", err);
-});
 
 // --- MULTER FILE STORAGE (UUID filenames) ---
 const storage = multer.diskStorage({
@@ -762,8 +746,8 @@ function startServerAISimulation() {
 server.listen(PORT, () => {
   console.log("==================================================");
   console.log("  TSMS FULL-STACK BACKEND STARTED SUCCESSFULLY   ");
-  console.log(`  REST API Port: http://localhost:${PORT}        `);
-  console.log(`  WebSocket URL: ws://localhost:${PORT}          `);
+  console.log(`  REST API Port: http://0.0.0.0:${PORT}        `);
+  console.log(`  WebSocket URL: ws://0.0.0.0:${PORT}          `);
   console.log("==================================================");
   startServerAISimulation();
   startAnomalyEngine(10000); // Check for AI Alerts every 10 seconds (for testing)

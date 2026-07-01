@@ -1,13 +1,5 @@
-const { Pool } = require("pg");
 const { logAudit } = require("./auditLogger");
-
-const pool = new Pool({
-  host: "localhost",
-  user: "postgres",
-  password: "kapil123",
-  database: "tsms_db",
-  port: 5432
-});
+const { pool } = require("./db");
 
 let broadcastCallback = null;
 

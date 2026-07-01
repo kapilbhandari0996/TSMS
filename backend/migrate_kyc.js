@@ -1,12 +1,7 @@
 const { Client } = require("pg");
+const { getDbConfig } = require("./db");
 
-const pgConfig = {
-  host: "localhost",
-  user: "postgres",
-  password: "kapil123",
-  database: "tsms_db",
-  port: 5432
-};
+const pgConfig = getDbConfig();
 
 async function migrate() {
   const client = new Client(pgConfig);

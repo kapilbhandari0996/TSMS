@@ -1,14 +1,6 @@
-const { Pool } = require("pg");
+const { pool } = require("./db");
 
-const pool = new Pool({
-  host: "localhost",
-  user: "postgres",
-  password: "kapil123",
-  database: "tsms_db",
-  port: 5432
-});
-
-async function logAudit(userId, role, action, ipAddress = "127.0.0.1") {
+async function logAudit(userId, role, action, ipAddress = "unknown") {
   try {
     await pool.query(
       `INSERT INTO audit_logs (user_id, role, action, ip_address) VALUES ($1, $2, $3, $4)`,

@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { Pool } = require('pg');
-const pool = new Pool({ user: 'postgres', host: 'localhost', database: 'tsms_db', password: 'kapil123', port: 5432 });
+const { pool } = require('./db');
 
 async function fixUser() {
   const hash = await bcrypt.hash('kapil123', 10);
