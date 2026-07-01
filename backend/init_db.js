@@ -17,17 +17,15 @@ async function init() {
     await client.connect();
     console.log("[DB] Connected to configured PostgreSQL database.");
 
-    // Drop tables to enforce password hashing reset
-    await client.query(`DROP TABLE IF EXISTS incidents CASCADE`);
-    await client.query(`DROP TABLE IF EXISTS tourists CASCADE`);
-    
-    // Create tourists table
+    await client.query("CREATE EXTENSION IF NOT EXISTS pgcrypto");
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS tourists (
         id VARCHAR(50) PRIMARY KEY,
         full_name VARCHAR(100),
+        tourist_name VARCHAR(100),
         email TEXT,
-        password_hash VARCHAR(255) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL DEFAULT '',
         date_of_birth DATE,
         nationality VARCHAR(50),
         passport_no TEXT,
@@ -56,9 +54,38 @@ async function init() {
         checkin_history TEXT[] DEFAULT '{}'
       )
     `);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS email TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) DEFAULT ''`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS date_of_birth DATE`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS nationality VARCHAR(50)`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS passport_no TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS passport_expiry DATE`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS visa_no TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS visa_expiry DATE`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_name TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_phone TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_name_2 TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_phone_2 TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_name_3 TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS emergency_contact_phone_3 TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS mobile_number TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS kyc_status VARCHAR(50) DEFAULT 'Pending'`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS kyc_rejection_reason TEXT`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Safe'`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS activity VARCHAR(100) DEFAULT 'Resting'`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS x INTEGER DEFAULT 220`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS y INTEGER DEFAULT 350`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS heart_rate INTEGER DEFAULT 72`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS speed REAL DEFAULT 0.0`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS battery INTEGER DEFAULT 100`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS last_updated VARCHAR(50)`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS last_active_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS last_moved_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS checkin_history TEXT[] DEFAULT '{}'`);
     console.log("[DB] Table 'tourists' verified/created.");
 
-    // Create incidents table
     await client.query(`
       CREATE TABLE IF NOT EXISTS incidents (
         id VARCHAR(50) PRIMARY KEY,
@@ -70,9 +97,14 @@ async function init() {
         status VARCHAR(50) DEFAULT 'Active'
       )
     `);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS timestamp VARCHAR(50)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`);
     console.log("[DB] Table 'incidents' verified/created.");
 
-    // Create ai_alerts table
     await client.query(`
       CREATE TABLE IF NOT EXISTS ai_alerts (
         id VARCHAR(50) PRIMARY KEY,
@@ -88,9 +120,18 @@ async function init() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS risk_level VARCHAR(50)`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS reason TEXT`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS x INTEGER`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS y INTEGER`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS reviewed_by VARCHAR(100)`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS remarks TEXT`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     console.log("[DB] Table 'ai_alerts' verified/created.");
 
-    // Create audit_logs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id SERIAL PRIMARY KEY,
@@ -103,7 +144,6 @@ async function init() {
     `);
     console.log("[DB] Table 'audit_logs' verified/created.");
 
-    // Create admins table
     await client.query(`
       CREATE TABLE IF NOT EXISTS admins (
         id SERIAL PRIMARY KEY,
@@ -115,7 +155,34 @@ async function init() {
     `);
     console.log("[DB] Table 'admins' verified/created.");
 
-    // 3. Seed initial data from db.json if tables are empty
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS kyc_submissions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tourist_id VARCHAR(50) REFERENCES tourists(id) ON DELETE CASCADE,
+        submitted_at TIMESTAMPTZ DEFAULT NOW(),
+        status VARCHAR(30) DEFAULT 'Pending',
+        rejection_reason TEXT,
+        ocr_full_name VARCHAR(200),
+        ocr_passport_no VARCHAR(50),
+        ocr_dob VARCHAR(20),
+        ocr_nationality VARCHAR(100),
+        ocr_expiry VARCHAR(20),
+        ocr_issuing_country VARCHAR(100),
+        ocr_mrz TEXT,
+        entered_full_name VARCHAR(200),
+        entered_passport_no VARCHAR(50),
+        entered_dob VARCHAR(20),
+        entered_nationality VARCHAR(100),
+        validation_passed BOOLEAN DEFAULT FALSE,
+        validation_errors JSONB DEFAULT '[]',
+        passport_doc_path TEXT,
+        visa_doc_path TEXT,
+        selfie_path TEXT,
+        face_match_score REAL DEFAULT 0
+      )
+    `);
+    console.log("[DB] Table 'kyc_submissions' verified/created.");
+
     const touristCountRes = await client.query("SELECT COUNT(*) FROM tourists");
     const count = parseInt(touristCountRes.rows[0].count, 10);
 
@@ -126,7 +193,6 @@ async function init() {
         const rawData = fs.readFileSync(dbJsonPath, "utf8");
         const initialData = JSON.parse(rawData);
 
-        // Seed Tourists
         for (const t of initialData.tourists) {
           const history = t.checkinHistory || [];
           const rawPassword = t.passwordHash || "sarah123";
@@ -134,13 +200,13 @@ async function init() {
           
           await client.query(`
             INSERT INTO tourists (
-              id, full_name, email, password_hash, date_of_birth, nationality, 
+              id, full_name, tourist_name, email, password_hash, date_of_birth, nationality, 
               passport_no, visa_no, visa_expiry, emergency_contact_name, 
               emergency_contact_phone, kyc_status, status, activity, x, y, 
               heart_rate, speed, battery, last_updated, checkin_history
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
           `, [
-            t.id, t.fullName, encrypt(t.email || ""), passwordHash, t.dateOfBirth || null, t.nationality || "",
+            t.id, t.fullName, t.fullName, encrypt(t.email || ""), passwordHash, t.dateOfBirth || null, t.nationality || "",
             encrypt(t.passportNo || ""), encrypt(t.visaNo || ""), t.visaExpiry || null, encrypt(t.emergencyContactName || ""),
             encrypt(t.emergencyContactPhone || ""), t.kycStatus || "Pending", t.status || "Safe", t.activity || "Resting",
             t.x || 220, t.y || 350, t.heartRate || 72, t.speed || 0.0, t.battery || 100, t.lastUpdated || "",
@@ -148,7 +214,6 @@ async function init() {
           ]);
         }
 
-        // Seed Admins
         const adminHash = await bcrypt.hash("admin123", 10);
         await client.query(`
           INSERT INTO admins (username, password_hash, full_name, role)
@@ -161,7 +226,6 @@ async function init() {
         console.log("[DB] Seeded admins with new password.");
         console.log(`[DB] Seeded ${initialData.tourists.length} tourists.`);
 
-        // Seed Incidents
         for (const inc of initialData.incidents) {
           await client.query(`
             INSERT INTO incidents (

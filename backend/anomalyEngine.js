@@ -47,14 +47,14 @@ async function triggerAlert(tourist, riskLevel, reason) {
 async function checkAnomalies() {
   try {
     const inactiveRes = await pool.query(`
-      SELECT id, tourist_name, status
+      SELECT id, COALESCE(tourist_name, full_name) AS tourist_name, status
       FROM tourists
       WHERE last_active_timestamp < NOW() - INTERVAL '6 hours'
       AND status != 'Distress'
     `);
 
     const stuckRes = await pool.query(`
-      SELECT id, tourist_name, status
+      SELECT id, COALESCE(tourist_name, full_name) AS tourist_name, status
       FROM tourists
       WHERE last_moved_timestamp < NOW() - INTERVAL '8 hours'
       AND status != 'Distress'
