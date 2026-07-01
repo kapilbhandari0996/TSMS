@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="title">TSMS | Tourist Portal</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Scripts -->
+  <script src="mockData.js"></script>
+  <script src="tourist.js" defer></script>
+</head>
+<body>
+
+  <!-- Siren Screen Border Overlay Flash -->
+  <div id="siren-active-overlay" class="siren-active-overlay"></div>
+
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <div class="logo-icon">🛡️</div>
+        <span>TSMS</span>
+      </div>
+      
+      <div style="font-size: 13px; font-weight: 600; color: var(--safe); display: flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.05); padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.15);">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--safe); display: inline-block; animation: pulse-green 1.5s infinite;"></span>
+        <span id="header-user-badge">Tourist Pass Active</span>
+      </div>
+
+      <!-- Language & Theme Settings Controls -->
+      <div class="header-controls">
+        <div class="lang-selector-wrapper">
+          <select id="language-select" aria-label="Language Selector">
+            <option value="en">English (US)</option>
+            <option value="es">Español (ES)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="ja">日本語 (JP)</option>
+            <option value="hi">हिन्दी (IN)</option>
+          </select>
+        </div>
+        
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
+
+        <!-- Logout button -->
+        <button id="logout-btn" class="btn-secondary" style="padding: 6px 14px; font-size: 12px; border-color: var(--danger); color: var(--danger);" title="Log Out">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Web Container -->
+  <main class="container">
+    
+    <section id="tourist-section" class="page-section active">
+      <div class="tourist-grid">
+        
+        <!-- Left Column: Identity & Wearables -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          
+          <!-- Identity Display -->
+          <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+            <div>
+              <h2 class="card-title" data-translate="idCardTitle">Verified Digital Identity</h2>
+              <p class="card-subtitle" data-translate="idCardSubtitle">Official Smart Safety Pass</p>
+            </div>
+            
+            <div class="id-card-wrapper">
+              <!-- Holographic ID Pass -->
+              <div class="smart-id-card">
+                <div class="id-hologram-line"></div>
+                <div class="id-header">
+                  <span class="id-logo">🛡️ TSMS PASS</span>
+                  <span id="id-card-status" class="id-badge-status" data-translate="statusSafe">Safe</span>
+                </div>
+                <div class="id-body">
+                  <div class="id-photo-container">👤</div>
+                  <div class="id-details">
+                    <div>
+                      <div class="id-lbl" data-translate="fullName">Full Name</div>
+                      <div id="id-card-name" class="id-name">Tourist Name</div>
+                    </div>
+                    <div class="id-row">
+                      <span class="id-lbl" data-translate="nationality">Nationality:</span>
+                      <span id="id-card-nationality" class="id-val">Origin Country</span>
+                    </div>
+                    <div class="id-row">
+                      <span class="id-lbl" data-translate="passportNo">Passport:</span>
+                      <span id="id-card-passport" class="id-val">Passport Number</span>
+                    </div>
+                    <div class="id-row">
+                      <span class="id-lbl" data-translate="touristId">Tourist ID:</span>
+                      <span id="id-card-id" class="id-val" style="color: var(--accent);">ID Code</span>
+                    </div>
+                    <div class="id-row">
+                      <span class="id-lbl">KYC Status:</span>
+                      <span id="id-card-kyc" class="kyc-badge">✅ Verified</span>
+                    </div>
+                  </div>
+                  <div class="id-qr-container">
+                    <canvas id="id-qr-canvas" class="id-qr-canvas" width="80" height="80"></canvas>
+                  </div>
+                </div>
+                <div class="id-barcode-container">
+                  <div class="id-barcode"></div>
+                  <span id="id-card-serial" class="id-serial">SN-00000000</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="id-controls">
+              <button id="id-print-btn" class="btn-secondary" data-translate="printId">Print Pass</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: SOS Emergency Console -->
+        <div class="glass-card sos-panel-content">
+          <h2 class="card-title" data-translate="sosTitle">Emergency SOS Console</h2>
+          <p class="card-subtitle" data-translate="sosSubtitle">IN EMERGENCY: Press and hold the SOS button for 3 seconds to alert local authorities.</p>
+
+          <span class="id-lbl" data-translate="sosTypeLabel" style="margin-bottom: 8px; align-self: flex-start;">Select Incident Category:</span>
+          
+          <!-- SOS Type Selector Grid -->
+          <div class="sos-types-list">
+            <button class="sos-type-btn selected" data-type="medical">
+              <span class="sos-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg></span>
+              <span data-translate="sosMedical">Medical</span>
+            </button>
+            <button class="sos-type-btn" data-type="accident">
+              <span class="sos-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffa502" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></span>
+              <span data-translate="sosAccident">Accident</span>
+            </button>
+            <button class="sos-type-btn" data-type="security">
+              <span class="sos-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e90ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+              <span data-translate="sosSecurity">Security</span>
+            </button>
+            <button class="sos-type-btn" data-type="other">
+              <span class="sos-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#feca57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
+              <span data-translate="sosOther">Other</span>
+            </button>
+          </div>
+
+          <!-- Concentric Pulse Trigger Ring -->
+          <div class="sos-btn-wrapper">
+            <div class="sos-btn-outer-ring"></div>
+            
+            <!-- Glow SVG Circle (Static) -->
+            <svg class="sos-countdown-ring" width="180" height="180">
+              <circle class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="transparent" />
+              <circle id="sos-progress-circle" class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="var(--danger)" stroke-width="6" fill="transparent" transform="rotate(-90 90 90)" style="stroke-dashoffset: 0;" />
+            </svg>
+            
+            <!-- Core One-Click Trigger Button -->
+            <button id="sos-trigger-btn" class="sos-trigger-btn" aria-label="Trigger SOS Alert">
+              <span class="sos-trigger-text" data-translate="sosButtonText">SOS HELP</span>
+              <span class="sos-trigger-subtext" style="font-size: 8px; opacity: 0.7;">Click to Trigger</span>
+            </button>
+          </div>
+
+          <!-- Active Alerts Transmitting panel -->
+          <div id="sos-active-alert" class="sos-status-alert">
+            <span style="font-size: 18px; animation: pulse-red 1s infinite; border-radius: 50%; width: 10px; height: 10px; background-color: white; display: inline-block;"></span>
+            <span>Distress Telemetry Transmitting...</span>
+          </div>
+
+          <button id="sos-cancel-btn" class="cancel-sos-btn" data-sec="5">Cancel SOS (Countdown: 5s)</button>
+
+          <!-- Activity logger settings -->
+          <div class="glass-card" style="width: 100%; margin-top: 30px; margin-bottom: 0; padding: 20px; text-align: left;">
+            <h3 data-translate="activityTitle" style="font-size: 15px; margin-bottom: 4px;">Log Tourist Activity</h3>
+            <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" data-translate="activitySubtitle">Help the safety AI understand your context to prevent false alerts.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <select id="tourist-activity-select" style="padding: 8px 12px; font-size: 13px;" aria-label="Activity Selector">
+                <option value="resting" data-translate="actResting" selected>Resting / At Hotel</option>
+                <option value="exploring" data-translate="actExploring">City Walk / Sightseeing</option>
+                <option value="hiking" data-translate="actHiking">Mountain Trekking / Hiking</option>
+                <option value="swimming" data-translate="actSwimming">Water Sports / Swimming</option>
+                <option value="transit" data-translate="actTransit">In Transit / Driving</option>
+              </select>
+              <textarea id="tourist-activity-note" placeholder="Write an emergency note or custom status update (Optional)..." style="padding: 10px 12px; font-size: 13px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; border-radius: 4px; resize: vertical; min-height: 60px;" aria-label="Custom Activity Note"></textarea>
+              <button id="update-activity-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; white-space: nowrap; align-self: flex-start;" data-translate="logActivityBtn">Update Status</button>
+            </div>
+          </div>
+
+          <!-- Privacy details -->
+          <div style="margin-top: 20px; text-align: left; font-size: 10px; color: var(--text-secondary); line-height: 1.4;">
+            <strong data-translate="privacyTitle">Privacy & Data Encryption:</strong>
+            <span data-translate="privacyText">Your personal details, live coordinates, and check-in logs are encrypted at rest. Location history is purged automatically every 48 hours. Only verified law enforcement and emergency dispatchers can access your details during an active SOS event.</span>
+            <button id="inspect-vault-btn-tourist" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-top: 10px; width: 100%; display: block; border-color: var(--safe); color: var(--safe);" data-translate="vaultInspectBtn">Inspect Storage Vault</button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+     SECURE STORAGE VAULT SLIDER PANEL (ENCRYPTION AUDIT SCREEN)
+     ========================================================================== -->
+  <aside id="vault-detail-panel" class="tourist-detail-panel" aria-label="Secure Encryption Vault Panel">
+    <div class="detail-header">
+      <h2 id="vault-panel-title" data-translate="vaultTitle" style="font-family: var(--font-display); color: var(--safe);">Secure Encryption Vault</h2>
+      <button id="close-vault-panel-btn" class="btn-icon" title="Close Panel">✕</button>
+    </div>
+    
+    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 20px;" data-translate="vaultSubtitle">Real-time sandbox data storage audit at rest.</p>
+
+    <!-- Raw data box -->
+    <div style="margin-bottom: 20px;">
+      <span class="detail-label" data-translate="vaultLabelRaw" style="display: block; font-weight: bold; margin-bottom: 8px; font-size: 11px;">Encrypted Storage (AES-256 Mock Cipher):</span>
+      <div id="vault-raw-payload" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 10px; word-break: break-all; color: var(--warning); max-height: 160px; overflow-y: auto;">
+        [Obfuscated Cipher Hash Code]
+      </div>
+    </div>
+
+    <!-- Decrypted view preview -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="detail-label" data-translate="vaultLabelDecrypted" style="font-weight: bold; font-size: 11px;">Authorized Decrypted Plaintext:</span>
+        <button id="vault-decrypt-btn" class="btn-primary" style="padding: 4px 8px; font-size: 10px; border-radius: 4px;" data-translate="decryptPreview">Decrypt Preview</button>
+      </div>
+      <div id="vault-decrypted-payload" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 10px; color: var(--safe); max-height: 220px; overflow-y: auto; white-space: pre-wrap;">
+        [LOCKED - Click Decrypt to Authenticate Session Key]
+      </div>
+    </div>
+
+    <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 15px; font-size: 9px; color: var(--text-secondary); line-height: 1.4; display: flex; gap: 8px; align-items: flex-start;">
+      <span>🔒</span>
+      <span data-translate="vaultLockText">Database secured with Sandbox Cipher Key. Only authorized dispatchers can view decrypted parameters.</span>
+    </div>
+  </aside>
+
+  <!-- SOS Confirmation Modal -->
+  <div id="sos-confirm-modal" class="sos-modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="SOS Confirmation">
+    <div class="sos-modal-card">
+      <div class="sos-modal-siren">🚨</div>
+      <h2 class="sos-modal-title">CONFIRM SOS ALERT?</h2>
+      <p class="sos-modal-subtitle">This will immediately notify emergency dispatchers of your location and distress.</p>
+
+      <div class="sos-modal-detail">
+        <div class="sos-modal-row"><span>Tourist:</span> <strong id="sos-modal-name">—</strong></div>
+        <div class="sos-modal-row"><span>Incident Type:</span> <strong id="sos-modal-type">—</strong></div>
+        <div class="sos-modal-row"><span>Tourist ID:</span> <strong id="sos-modal-id">—</strong></div>
+      </div>
+
+      <button id="sos-modal-confirm-btn" class="sos-modal-confirm-btn">🆘 CONFIRM — SEND SOS ALERT NOW</button>
+      <button id="sos-modal-cancel-btn" class="sos-modal-cancel-btn">✕ Cancel — False Alarm</button>
+    </div>
+  </div>
+
+  <!-- Toast notifications overlay -->
+  <div id="toast-notifications-container" class="toast-container"></div>
+
+  <!-- Animations -->
+  <style>
+    @keyframes pulse-green {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+  </style>
+
+</body>
+</html>

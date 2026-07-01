@@ -1,0 +1,241 @@
+{
+  "admins": [
+    {
+      "username": "admin",
+      "passwordHash": "admin@tsms123",
+      "fullName": "System Administrator",
+      "role": "Super Admin"
+    }
+  ],
+  "tourists": [
+    {
+      "id": "TSMS-1084",
+      "fullName": "Sarah Jenkins",
+      "email": "sarah.jenkins@email.com",
+      "passwordHash": "sarah123",
+      "dateOfBirth": "1990-03-15",
+      "nationality": "United Kingdom",
+      "passportNo": "GBR-908123A",
+      "visaNo": "V-98741029",
+      "visaExpiry": "2026-12-15",
+      "emergencyContactName": "David Jenkins",
+      "emergencyContactPhone": "+44 7700 900077",
+      "kycStatus": "Verified",
+      "status": "Safe",
+      "activity": "Exploring / Sightseeing",
+      "x": 61,
+      "y": 61,
+      "checkinHistory": [
+        "Hotel Royal Check-in (09:00 AM)",
+        "City Museum check-in (11:30 AM)",
+        "Central Bazaar walk (02:15 PM)"
+      ],
+      "heartRate": 75,
+      "speed": 2.6,
+      "battery": 0,
+      "lastUpdated": "Just now",
+      "wearableConnected": false,
+      "wearableType": "",
+      "highRiskModeActive": false
+    },
+    {
+      "id": "TSMS-2041",
+      "fullName": "Akira Tanaka",
+      "email": "akira.tanaka@email.com",
+      "passwordHash": "akira123",
+      "dateOfBirth": "1985-07-22",
+      "nationality": "Japan",
+      "passportNo": "JPN-556108Z",
+      "visaNo": "V-10294857",
+      "visaExpiry": "2027-01-20",
+      "emergencyContactName": "Yuki Tanaka",
+      "emergencyContactPhone": "+81 90 1234 5678",
+      "kycStatus": "Verified",
+      "status": "Warning",
+      "activity": "Mountain Trekking / Hiking",
+      "x": 281,
+      "y": 212,
+      "checkinHistory": [
+        "Base Camp registration (07:00 AM)",
+        "Ridge trail entry (10:15 AM)"
+      ],
+      "heartRate": 119,
+      "speed": 3.6,
+      "battery": 0,
+      "lastUpdated": "Just now",
+      "wearableConnected": true,
+      "wearableType": "Garmin Fenix 8",
+      "highRiskModeActive": false
+    },
+    {
+      "id": "TSMS-3092",
+      "fullName": "Carlos Gomez",
+      "email": "carlos.gomez@email.com",
+      "passwordHash": "carlos123",
+      "dateOfBirth": "1992-11-08",
+      "nationality": "Spain",
+      "passportNo": "ESP-440182K",
+      "visaNo": "V-30491827",
+      "visaExpiry": "2026-09-08",
+      "emergencyContactName": "Maria Gomez",
+      "emergencyContactPhone": "+34 600 123 456",
+      "kycStatus": "Verified",
+      "status": "Safe",
+      "activity": "Resting / At Hotel",
+      "x": 172,
+      "y": 214,
+      "checkinHistory": [
+        "Seaside Resort Check-in (03:00 PM)",
+        "Dinner at Bistro (08:30 PM)"
+      ],
+      "heartRate": 68,
+      "speed": 0,
+      "battery": 13,
+      "lastUpdated": "Just now",
+      "wearableConnected": false,
+      "wearableType": "",
+      "highRiskModeActive": false
+    },
+    {
+      "id": "TSMS-4015",
+      "fullName": "Amara Diop",
+      "email": "amara.diop@email.com",
+      "passwordHash": "amara123",
+      "dateOfBirth": "1995-04-30",
+      "nationality": "Senegal",
+      "passportNo": "SEN-112288H",
+      "visaNo": "V-55648391",
+      "visaExpiry": "2026-11-30",
+      "emergencyContactName": "Lamine Diop",
+      "emergencyContactPhone": "+221 77 123 45 67",
+      "kycStatus": "Verified",
+      "status": "Safe",
+      "activity": "Water Sports / Swimming",
+      "x": 506,
+      "y": 268,
+      "checkinHistory": [
+        "Beach Club entry (10:00 AM)",
+        "Jet Ski booking (11:00 AM)"
+      ],
+      "heartRate": 123,
+      "speed": 5.2,
+      "battery": 0,
+      "lastUpdated": "Just now",
+      "wearableConnected": false,
+      "wearableType": "",
+      "highRiskModeActive": false
+    },
+    {
+      "id": "TSMS-5099",
+      "fullName": "Chloe Dubois",
+      "email": "chloe.dubois@email.com",
+      "passwordHash": "chloe123",
+      "dateOfBirth": "1988-09-12",
+      "nationality": "France",
+      "passportNo": "FRA-776655L",
+      "visaNo": "V-88294018",
+      "visaExpiry": "2026-08-22",
+      "emergencyContactName": "Pierre Dubois",
+      "emergencyContactPhone": "+33 6 1234 5678",
+      "kycStatus": "Verified",
+      "status": "Inactive",
+      "activity": "Mountain Trekking / Hiking",
+      "x": 446,
+      "y": 49,
+      "checkinHistory": [
+        "Canyon Trail Gate (Yesterday 02:00 PM)"
+      ],
+      "heartRate": 119,
+      "speed": 2.6,
+      "battery": 0,
+      "lastUpdated": "Just now",
+      "wearableConnected": false,
+      "wearableType": "",
+      "highRiskModeActive": false
+    },
+    {
+      "id": "TSMS-7659",
+      "fullName": "Kapil Bhandari",
+      "email": "kapil@gmail.com",
+      "passwordHash": "kapil123",
+      "dateOfBirth": "2026-06-30",
+      "nationality": "indian",
+      "passportNo": "6424818",
+      "visaNo": "2451348",
+      "visaExpiry": "2026-06-30",
+      "emergencyContactName": "tanish",
+      "emergencyContactPhone": "9371601797 (Friend)",
+      "kycStatus": "Verified",
+      "status": "Safe",
+      "activity": "Resting / At Hotel",
+      "x": 42,
+      "y": 39,
+      "checkinHistory": [
+        "KYC Verified & Safety Registration Completed (02:47 pm)"
+      ],
+      "heartRate": 60,
+      "speed": 0,
+      "battery": 58,
+      "lastUpdated": "Just now",
+      "wearableConnected": false,
+      "wearableType": "",
+      "highRiskModeActive": false
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-9912",
+      "touristId": "TSMS-1084",
+      "touristName": "Sarah Jenkins",
+      "type": "Medical Emergency",
+      "timestamp": "14:32",
+      "location": "Central Market Square",
+      "status": "Resolved",
+      "details": "Tourist reported severe dehydration. Emergency paramedics dispatched. Patient treated on-site and cleared."
+    },
+    {
+      "id": "INC-9911",
+      "touristId": "TSMS-3092",
+      "touristName": "Carlos Gomez",
+      "type": "Security Threat / Theft",
+      "timestamp": "19:10",
+      "location": "Metro Station North Line",
+      "status": "Resolved",
+      "details": "Reported stolen passport wallet. Metro transit security intercepted suspect. Wallet returned; incident closed."
+    }
+  ],
+  "aiAlerts": [
+    {
+      "timestamp": "12:45 pm",
+      "touristId": "TSMS-2041",
+      "touristName": "Akira Tanaka",
+      "level": "Warning",
+      "message": "Telemetry warning: Battery level critical (19%) in remote high-elevation area. High drop risk.",
+      "status": "Active"
+    },
+    {
+      "timestamp": "10:48 AM",
+      "touristId": "TSMS-2041",
+      "touristName": "Akira Tanaka",
+      "level": "Warning",
+      "message": "Battery level below 25% in remote alpine wilderness geofence. High communication loss risk.",
+      "status": "Active"
+    },
+    {
+      "timestamp": "08:57 AM",
+      "touristId": "TSMS-5099",
+      "touristName": "Chloe Dubois",
+      "level": "Danger",
+      "message": "Telemetry disconnect. Zero velocity, zero heart-rate data for 120 minutes. Remote canyon zone.",
+      "status": "Active"
+    },
+    {
+      "timestamp": "07:15 AM",
+      "touristId": "TSMS-4015",
+      "touristName": "Amara Diop",
+      "level": "Info",
+      "message": "Entered coastal speedway geofence. Speed matches boat telemetry.",
+      "status": "Cleared"
+    }
+  ]
+}

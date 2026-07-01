@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="title">TSMS | Secure Portal Access</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="mockData.js"></script>
+  <script src="login.js" defer></script>
+  <style>
+    /* ---- OCR Comparison Panel ---- */
+    .ocr-compare-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+    .ocr-field-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px 20px; border-radius: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); text-align: center; }
+    .ocr-field-row.mismatch { border-color: var(--danger); background: rgba(239,68,68,0.07); }
+    .ocr-field-row.match { border-color: var(--safe); background: rgba(34,197,94,0.07); }
+    .ocr-field-label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+    .ocr-field-values { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .ocr-val { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+    .ocr-val.entered { background: var(--bg-tertiary); color: var(--text-primary); }
+    .ocr-val.extracted { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+    .ocr-field-msg { font-size: 11px; color: var(--danger); font-weight: 600; margin-top: 2px; }
+    .ocr-field-ok { font-size: 11px; color: var(--safe); font-weight: 600; margin-top: 2px; }
+    .ocr-section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin: 14px 0 6px; }
+    .ocr-mrz-box { background: var(--bg-tertiary); border-radius: 8px; padding: 8px 12px; font-family: monospace; font-size: 11px; color: var(--accent); overflow-x: auto; word-break: break-all; }
+    .ocr-status-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px; font-weight: 700; }
+    .ocr-status-banner.ok { background: rgba(34,197,94,0.1); border: 1px solid var(--safe); color: var(--safe); }
+    .ocr-status-banner.fail { background: rgba(239,68,68,0.1); border: 1px solid var(--danger); color: var(--danger); }
+    .ocr-status-banner.warn { background: rgba(251,191,36,0.1); border: 1px solid var(--warning); color: var(--warning); }
+
+    /* ---- KYC Status States ---- */
+    .kyc-pending-state, .kyc-rejected-state { text-align: center; padding: 30px 20px; }
+    .kyc-pending-icon { font-size: 52px; margin-bottom: 12px; }
+    .kyc-pending-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .kyc-pending-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .kyc-id-badge { display: inline-block; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-size: 18px; font-weight: 900; padding: 8px 20px; border-radius: 12px; margin: 16px 0; letter-spacing: 1px; }
+
+    /* ---- Upload Boxes ---- */
+    .upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kyc-upload-single { border: 2px dashed var(--border-color); border-radius: 12px; padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .kyc-upload-single:hover { border-color: var(--accent); background: var(--accent-glow); }
+    .kyc-upload-single.uploaded { border-color: var(--safe); border-style: solid; }
+    .kyc-upload-single .upload-icon { font-size: 26px; margin-bottom: 6px; }
+    .kyc-upload-single .upload-label { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .kyc-upload-single .upload-hint { font-size: 10px; color: var(--text-secondary); }
+    .kyc-upload-single .upload-status { font-size: 11px; color: var(--safe); font-weight: 700; margin-top: 6px; display: none; }
+
+    /* Login guard messages */
+    .kyc-guard-card { padding: 40px 24px; text-align: center; }
+    .kyc-guard-icon { font-size: 60px; margin-bottom: 16px; }
+    .kyc-guard-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .kyc-guard-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.7; max-width: 320px; margin: 0 auto 20px; }
+    .kyc-guard-id { display: inline-block; background: var(--warning-glow, rgba(251,191,36,0.1)); border: 1px solid var(--warning); color: var(--warning); font-weight: 800; font-size: 14px; padding: 6px 16px; border-radius: 10px; margin-bottom: 16px; }
+
+    /* mobile number field */
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <div class="logo-icon">🛡️</div>
+        <span>TSMS</span>
+      </div>
+      <div class="header-controls">
+        <div class="lang-selector-wrapper">
+          <select id="language-select" aria-label="Language Selector">
+            <option value="en">English (US)</option>
+            <option value="es">Español (ES)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="ja">日本語 (JP)</option>
+            <option value="hi">हिन्दी (IN)</option>
+          </select>
+        </div>
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container-wrapper">
+    <div class="auth-card">
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tab-tourist-login" data-translate="touristLoginTab">Tourist Login</button>
+        <button class="auth-tab-btn" id="tab-tourist-reg" data-translate="registerTab">Register</button>
+      </div>
+
+      <!-- ========== TAB 1: TOURIST LOGIN ========== -->
+      <div id="tourist-login-form-wrapper">
+        <div class="auth-header">
+          <div class="auth-logo">🌍</div>
+          <h2 class="auth-title" data-translate="touristLoginTitle">Tourist Portal Login</h2>
+          <p class="auth-subtitle" data-translate="touristLoginSub">Access your TSMS Safety Pass and Emergency Console</p>
+        </div>
+
+        <!-- KYC Guard - shown when kycStatus is Pending or Rejected -->
+        <div id="kyc-guard-pending" class="kyc-guard-card" style="display:none;">
+          <div class="kyc-guard-icon">⏳</div>
+          <h3 class="kyc-guard-title">Verification Pending</h3>
+          <div id="kyc-guard-tourist-id" class="kyc-guard-id"></div>
+          <p class="kyc-guard-sub">Your identity documents have been submitted and are awaiting review by our security team. You will be able to access the Tourist Portal once your KYC is approved.</p>
+          <button class="btn-secondary" onclick="document.getElementById('kyc-guard-pending').style.display='none'; document.getElementById('tourist-login-form').style.display='block';" style="font-size:12px; padding: 8px 18px;">← Back to Login</button>
+        </div>
+
+        <div id="kyc-guard-rejected" class="kyc-guard-card" style="display:none;">
+          <div class="kyc-guard-icon">❌</div>
+          <h3 class="kyc-guard-title" style="color: var(--danger);">Verification Rejected</h3>
+          <p class="kyc-guard-sub">Your KYC submission was rejected. Please re-register with valid documents.</p>
+          <div id="kyc-rejection-reason-display" style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--danger); font-weight: 600; margin-bottom: 16px;"></div>
+          <button class="btn-secondary" onclick="document.getElementById('kyc-guard-rejected').style.display='none'; document.getElementById('tourist-login-form').style.display='block';" style="font-size:12px; padding: 8px 18px;">← Back to Login</button>
+        </div>
+
+        <div id="tourist-login-error" class="auth-error" style="display:none;"></div>
+
+        <form id="tourist-login-form">
+          <div class="auth-form-group">
+            <label for="t-login-id" class="auth-label" data-translate="touristIdEmail">Tourist ID / Email Address</label>
+            <input type="text" id="t-login-id" class="auth-input" placeholder="TSMS-XXXX / email@example.com" autocomplete="username" required>
+          </div>
+          <div class="auth-form-group">
+            <label for="t-login-pass" class="auth-label" data-translate="password">Password</label>
+            <div style="position: relative;">
+              <input type="password" id="t-login-pass" class="auth-input" placeholder="Enter your password" autocomplete="current-password" required style="padding-right: 35px;">
+              <span class="toggle-password" onclick="togglePassword('t-login-pass', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary);">👁️</span>
+            </div>
+          </div>
+          <button type="submit" id="t-login-btn" class="auth-submit-btn">🔓 <span data-translate="signInBtn">Sign In to Tourist Portal</span></button>
+        </form>
+
+
+      </div>
+
+      <!-- ========== TAB 2: KYC REGISTRATION WIZARD ========== -->
+      <div id="tourist-reg-wrapper" style="display: none;">
+        <div class="kyc-wizard">
+
+          <!-- Step Progress Bar (7 steps) -->
+          <div class="kyc-progress">
+            <div class="kyc-steps-track">
+              <div class="kyc-step-dot active" data-step="1">1</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="2">2</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="3">3</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="4">4</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="5">5</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="6">6</div>
+              <div class="kyc-step-line"></div>
+              <div class="kyc-step-dot" data-step="7">7</div>
+            </div>
+            <div id="kyc-step-label" class="kyc-step-label">Step 1 of 7 — Personal Information</div>
+          </div>
+
+          <!-- STEP 1: Personal Info -->
+          <div class="kyc-step-panel active" id="kyc-step-1">
+            <div class="kyc-step-icon">👤</div>
+            <h3 class="kyc-step-title">Personal Information</h3>
+            <p class="kyc-step-desc">Enter your legal name and basic details exactly as they appear on your passport.</p>
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">First Name *</label>
+                <input type="text" id="kyc-firstname" class="auth-input" placeholder="e.g. John">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Middle Name *</label>
+                <input type="text" id="kyc-middlename" class="auth-input" placeholder="e.g. Michael">
+              </div>
+            </div>
+            <div class="auth-form-group">
+              <label class="auth-label">Last Name *</label>
+              <input type="text" id="kyc-lastname" class="auth-input" placeholder="e.g. Doe">
+            </div>
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">Nationality *</label>
+                <input type="text" id="kyc-nationality" class="auth-input" placeholder="e.g. Indian">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Date of Birth *</label>
+                <input type="date" id="kyc-dob" class="auth-input">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">Email Address *</label>
+                <input type="email" id="kyc-email" class="auth-input" placeholder="john.doe@email.com">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Mobile Number *</label>
+                <input type="tel" id="kyc-mobile" class="auth-input" placeholder="+91 9876543210">
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Documents Upload -->
+          <div class="kyc-step-panel" id="kyc-step-2">
+            <div class="kyc-step-icon">🪪</div>
+            <h3 class="kyc-step-title">Travel Documents</h3>
+            <p class="kyc-step-desc">Enter your travel document details and upload scanned copies. OCR will auto-extract and verify the data.</p>
+
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">Passport Number *</label>
+                <input type="text" id="kyc-passport" class="auth-input" placeholder="e.g. A1234567">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Passport Expiry Date *</label>
+                <input type="date" id="kyc-passport-expiry" class="auth-input">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">Visa Number</label>
+                <input type="text" id="kyc-visa" class="auth-input" placeholder="Visa Slip ID (optional)">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Visa Expiry Date</label>
+                <input type="date" id="kyc-visaexpiry" class="auth-input">
+              </div>
+            </div>
+
+            <!-- Document Upload Boxes -->
+            <p class="kyc-step-desc" style="margin-top: 14px; font-weight: 700; font-size: 12px; color: var(--text-primary);">📤 Upload Documents (JPG / PNG / PDF)</p>
+            <div class="upload-row">
+              <!-- Passport Upload -->
+              <div class="kyc-upload-single" id="passport-upload-box" onclick="document.getElementById('kyc-passport-file').click()">
+                <div class="upload-icon">🛂</div>
+                <div class="upload-label">Passport Scan *</div>
+                <div class="upload-hint">Photo / bio data page</div>
+                <input type="file" id="kyc-passport-file" accept="image/*,.pdf" style="display:none">
+                <div class="upload-status" id="passport-upload-status">✅ Uploaded</div>
+              </div>
+              <!-- Visa Upload -->
+              <div class="kyc-upload-single" id="visa-upload-box" onclick="document.getElementById('kyc-visa-file').click()">
+                <div class="upload-icon">📋</div>
+                <div class="upload-label">Visa Document</div>
+                <div class="upload-hint">Visa stamp / sticker (optional)</div>
+                <input type="file" id="kyc-visa-file" accept="image/*,.pdf" style="display:none">
+                <div class="upload-status" id="visa-upload-status">✅ Uploaded</div>
+              </div>
+            </div>
+            <div id="kyc-upload-progress" style="display:none; margin-top: 14px; text-align: center;">
+              <div style="font-size: 13px; color: var(--accent); font-weight: 700;">🔍 Running OCR on your passport...</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">This may take up to 30 seconds. Please wait.</div>
+              <div style="margin-top: 10px; height: 4px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;">
+                <div id="ocr-progress-bar" style="height: 100%; width: 0%; background: var(--accent); transition: width 0.5s; border-radius: 4px;"></div>
+              </div>
+            </div>
+            <div id="kyc-upload-error" class="auth-error" style="display:none; margin-top: 10px;"></div>
+          </div>
+
+          <!-- STEP 3: OCR Verification Results -->
+          <div class="kyc-step-panel" id="kyc-step-3">
+            <div class="kyc-step-icon">🔍</div>
+            <h3 class="kyc-step-title">OCR Document Verification</h3>
+
+            <div id="ocr-status-banner" class="ocr-status-banner ok">
+              <span id="ocr-status-text"></span>
+            </div>
+
+            <div id="ocr-compare-container">
+              <!-- Populated by JS -->
+            </div>
+
+            <div id="ocr-mrz-section" style="display:none; margin-top: 14px;">
+              <div class="ocr-section-title">🔢 MRZ (Machine Readable Zone)</div>
+              <div class="ocr-mrz-box" id="ocr-mrz-display"></div>
+            </div>
+
+            <div id="ocr-no-data-msg" style="display:none; text-align:center; padding: 20px; color: var(--text-secondary);">
+              <div style="font-size: 36px; margin-bottom: 8px;">⚠️</div>
+              <div style="font-weight: 700; margin-bottom: 6px; color: var(--warning);">OCR Could Not Read Document</div>
+              <div style="font-size: 12px; line-height: 1.6;">The uploaded image may be too blurry or low resolution. You can still proceed — your documents will be manually reviewed by our admin team.</div>
+            </div>
+
+            <div id="ocr-mismatch-warning" class="auth-error" style="display:none; margin-top: 12px;">
+              ⚠️ Please review and correct the highlighted mismatches before proceeding. You may edit your entered information in the fields above.
+            </div>
+          </div>
+
+          <!-- STEP 4: Selfie / Face Scan -->
+          <div class="kyc-step-panel" id="kyc-step-4">
+            <div class="kyc-step-icon">📸</div>
+            <h3 class="kyc-step-title">Identity Selfie</h3>
+            <p class="kyc-step-desc">Capture a live selfie for comparison with your passport photo. Ensure your face is clearly visible and well-lit.</p>
+            <div class="kyc-face-scan-wrapper">
+              <div class="kyc-face-frame" id="kyc-face-frame">
+                <div class="kyc-face-scan-ring"></div>
+                <video id="kyc-camera-stream" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;border-radius:50%;"></video>
+                <img id="kyc-captured-image" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:50%;" alt="Captured Selfie">
+                <span class="kyc-face-icon">👤</span>
+              </div>
+              <div id="kyc-scan-status" style="font-size:12px;color:var(--text-secondary);margin-top:16px;">Position your face inside the frame</div>
+            </div>
+            <button type="button" id="kyc-capture-btn" class="btn-primary" style="width:100%;margin-top:10px;padding:12px;">📸 Start Camera &amp; Capture Selfie</button>
+            <button type="button" id="kyc-retake-btn" class="btn-secondary" style="width:100%;margin-top:8px;padding:10px;display:none;">🔄 Retake Selfie</button>
+            <div id="kyc-face-result" style="display:none;text-align:center;margin-top:12px;color:var(--safe);font-weight:700;">✅ Selfie Captured</div>
+            <p style="font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 10px;">Selfie is optional but helps speed up your verification.</p>
+          </div>
+
+          <!-- STEP 5: Emergency Contact -->
+          <div class="kyc-step-panel" id="kyc-step-5">
+            <div class="kyc-step-icon">🆘</div>
+            <h3 class="kyc-step-title">Emergency Contact</h3>
+            <p class="kyc-step-desc">Who should authorities contact in case of an emergency involving you?</p>
+            <div class="auth-form-group">
+              <label class="auth-label">Contact Full Name *</label>
+              <input type="text" id="kyc-emg-name" class="auth-input" placeholder="Jane Doe">
+            </div>
+            <div class="form-row">
+              <div class="auth-form-group">
+                <label class="auth-label">Phone Number *</label>
+                <input type="tel" id="kyc-emg-phone" class="auth-input" placeholder="+91 9876543210">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Relationship</label>
+                <select id="kyc-emg-relation" class="auth-input" style="height:48px;">
+                  <option>Parent</option><option>Spouse</option><option>Sibling</option><option>Friend</option><option>Colleague</option><option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Optional Emergency Contact 2 -->
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
+              <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Emergency Contact 2 (Optional)</h4>
+              <div class="auth-form-group">
+                <label class="auth-label">Contact Full Name</label>
+                <input type="text" id="kyc-emg-name-2" class="auth-input" placeholder="John Smith">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Phone Number</label>
+                <input type="tel" id="kyc-emg-phone-2" class="auth-input" placeholder="+1 234567890">
+              </div>
+            </div>
+
+            <!-- Optional Emergency Contact 3 -->
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
+              <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Emergency Contact 3 (Optional)</h4>
+              <div class="auth-form-group">
+                <label class="auth-label">Contact Full Name</label>
+                <input type="text" id="kyc-emg-name-3" class="auth-input" placeholder="Mary Jane">
+              </div>
+              <div class="auth-form-group">
+                <label class="auth-label">Phone Number</label>
+                <input type="tel" id="kyc-emg-phone-3" class="auth-input" placeholder="+44 987654321">
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 6: Set Password -->
+          <div class="kyc-step-panel" id="kyc-step-6">
+            <div class="kyc-step-icon">🔐</div>
+            <h3 class="kyc-step-title">Secure Your Account</h3>
+            <p class="kyc-step-desc">Create a password to protect your TSMS account.</p>
+            <div class="auth-form-group">
+              <label class="auth-label">Password *</label>
+              <div style="position: relative;">
+                <input type="password" id="kyc-password" class="auth-input" placeholder="Minimum 6 characters" style="padding-right: 35px;">
+                <span class="toggle-password" onclick="togglePassword('kyc-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary);">👁️</span>
+              </div>
+            </div>
+            <div class="auth-form-group">
+              <label class="auth-label">Confirm Password *</label>
+              <div style="position: relative;">
+                <input type="password" id="kyc-password-confirm" class="auth-input" placeholder="Re-enter your password" style="padding-right: 35px;">
+                <span class="toggle-password" onclick="togglePassword('kyc-password-confirm', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary);">👁️</span>
+              </div>
+            </div>
+            <div id="kyc-pw-error" class="auth-error" style="display:none;margin-top:10px;">⚠️ Passwords do not match.</div>
+            <div class="kyc-security-note">🔒 Your password is stored securely. TSMS staff cannot view it.</div>
+          </div>
+
+          <!-- STEP 7: Submission Status -->
+          <div class="kyc-step-panel" id="kyc-step-7">
+            <div id="kyc-submitting-state" style="text-align:center; padding: 20px 0;">
+              <div style="font-size:48px; margin-bottom:12px;">⏳</div>
+              <h3 class="kyc-step-title" style="text-align:center;">Submitting Your Registration...</h3>
+              <p class="kyc-step-desc" style="text-align:center;">Please wait while we securely store your information.</p>
+            </div>
+
+            <div id="kyc-success-state" style="display:none;">
+              <div class="kyc-pending-state">
+                <div class="kyc-pending-icon">📋</div>
+                <h3 class="kyc-pending-title">Registration Submitted!</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Your Tourist ID has been issued:</p>
+                <div class="kyc-id-badge" id="kyc-issued-id">TSMS-XXXX</div>
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(251,191,36,0.1); border: 1px solid var(--warning); color: var(--warning); border-radius: 10px; padding: 8px 16px; margin: 14px 0; font-size: 13px; font-weight: 700;">
+                  ⏳ KYC Status: Pending Admin Review
+                </div>
+                <p class="kyc-pending-sub">Your identity documents have been submitted for review. Our security team will verify them shortly. You'll be able to log in once your account is approved.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 14px;">Keep your Tourist ID safe — you'll need it to log in once approved.</p>
+                <button class="btn-primary" onclick="window.location.href='/login'" style="margin-top: 18px; padding: 12px 28px;">← Return to Login</button>
+              </div>
+            </div>
+
+            <div id="kyc-error-state" style="display:none; text-align: center; padding: 20px 0;">
+              <div style="font-size:48px; margin-bottom:12px;">❌</div>
+              <h3 class="kyc-step-title" style="text-align:center; color: var(--danger);">Submission Failed</h3>
+              <p id="kyc-submit-error-msg" class="kyc-step-desc" style="text-align:center;"></p>
+              <button class="btn-secondary" id="kyc-retry-btn" style="margin-top: 14px; padding: 10px 22px;">← Go Back &amp; Retry</button>
+            </div>
+          </div>
+
+          <!-- KYC Navigation Buttons -->
+          <div class="kyc-nav" id="kyc-nav">
+            <button id="kyc-back-btn" class="btn-secondary" style="flex:1;padding:12px;">← Back</button>
+            <button id="kyc-next-btn" class="btn-primary" style="flex:2;padding:12px;">Continue →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-notifications-container" class="toast-container"></div>
+
+</body>
+</html>

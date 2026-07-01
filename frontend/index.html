@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="title">TSMS | Smart Tourist Safety</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Scripts -->
+  <script src="mockData.js"></script>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <div class="logo-icon">🛡️</div>
+        <span>TSMS</span>
+      </div>
+
+      <!-- Language & Theme Settings Controls -->
+      <div class="header-controls">
+        <div class="lang-selector-wrapper">
+          <select id="language-select" aria-label="Language Selector">
+            <option value="en">English (US)</option>
+            <option value="es">Español (ES)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="ja">日本語 (JP)</option>
+            <option value="hi">हिन्दी (IN)</option>
+          </select>
+        </div>
+        
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Web Container -->
+  <main class="container">
+    
+    <!-- HOME LANDING PAGE SECTION -->
+    <section id="home-section" class="page-section active" style="margin-top: 40px;">
+      <div class="hero-section">
+        <div class="hero-badge">
+          <span style="color: var(--safe);">●</span> AI-Enabled Safe Tourism System Active
+        </div>
+        <h1 data-translate="heroTitle">Tourist Safety & Smart Monitoring System</h1>
+        <p data-translate="heroSubtitle">Experience travel with peace of mind. Secure digital identity, intelligent behavior monitoring, and instant emergency response at your fingertips.</p>
+        
+        <div class="hero-buttons" style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+          <button class="btn-primary" onclick="window.location.href='/tourist'" style="padding: 15px 30px; font-size: 16px; font-weight: bold;" data-translate="navTourist">Tourist Portal</button>
+          <button class="btn-secondary" onclick="window.location.href='/admin'" style="padding: 15px 30px; font-size: 16px; font-weight: bold;" data-translate="navAdmin">Admin Control Center</button>
+        </div>
+      </div>
+
+      <div class="features-grid" style="margin-top: 60px;">
+        <!-- Feature 1 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🆔</div>
+          <h3 data-translate="idCardTitle" style="margin-bottom: 8px;">Verified Digital Identity</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Get an official digital safety pass verified with a unique Tourist ID and dynamic secure QR codes to streamline access to tourism departments and hotels.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🆘</div>
+          <h3 data-translate="sosTitle" style="margin-bottom: 8px;">Emergency SOS Console</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Instantly broadcast GPS telemetry and emergency categories (medical, accident, security) to command dashboards in less than 3 seconds.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3 data-translate="aiLogs" style="margin-bottom: 8px;">AI Risk Detection</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Continuous telemetry analysis catches unusual speed, geofence breaches, and device inactivity, flagging risks to security dispatchers before they escalate.</p>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Overview -->
+      <div class="landing-stats" style="margin-top: 60px; margin-bottom: 60px;">
+        <div class="stat-item">
+          <div class="stat-val">12k+</div>
+          <div class="stat-lbl">Tourists Protected</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">&lt; 3s</div>
+          <div class="stat-lbl">SOS Broadcast Speed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">99.8%</div>
+          <div class="stat-lbl">Safety Index Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">24/7</div>
+          <div class="stat-lbl">Active Dispatch</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Inline Landing Page Script for translations & theme toggling -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const STORAGE_KEYS = {
+        LANGUAGE: "tsms_lang",
+        THEME: "tsms_theme"
+      };
+      
+      let lang = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || "en";
+      let theme = localStorage.getItem(STORAGE_KEYS.THEME) || "dark";
+      
+      document.getElementById("language-select").value = lang;
+      translateApp(lang);
+      
+      if (theme === "light") {
+        document.body.classList.add("light-theme");
+        document.getElementById("theme-toggle-icon").innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        document.getElementById("theme-toggle-icon").innerText = "☀️";
+      }
+      
+      // Theme Toggle Action
+      document.getElementById("theme-toggle-btn").addEventListener("click", () => {
+        if (document.body.classList.contains("light-theme")) {
+          document.body.classList.remove("light-theme");
+          document.getElementById("theme-toggle-icon").innerText = "☀️";
+          theme = "dark";
+        } else {
+          document.body.classList.add("light-theme");
+          document.getElementById("theme-toggle-icon").innerText = "🌙";
+          theme = "light";
+        }
+        localStorage.setItem(STORAGE_KEYS.THEME, theme);
+      });
+      
+      // Language Change Action
+      document.getElementById("language-select").addEventListener("change", (e) => {
+        lang = e.target.value;
+        translateApp(lang);
+      });
+      
+      function translateApp(lang) {
+        localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+        const dict = window.TSMS_MOCK_DATA.translations[lang] || window.TSMS_MOCK_DATA.translations.en;
+        document.title = dict.title || "TSMS | Smart Tourist Safety";
+        
+        document.querySelectorAll("[data-translate]").forEach(elem => {
+          const key = elem.getAttribute("data-translate");
+          if (dict[key]) {
+            elem.innerHTML = dict[key];
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

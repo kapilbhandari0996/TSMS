@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSMS | Secure Admin Access</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Scripts -->
+  <script src="mockData.js"></script>
+  <script src="admin-login.js" defer></script>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <div class="logo-icon">🛡️</div>
+        <span>TSMS</span>
+      </div>
+
+      <!-- Language & Theme Settings Controls -->
+      <div class="header-controls">
+        <div class="lang-selector-wrapper">
+          <select id="language-select" aria-label="Language Selector">
+            <option value="en">English (US)</option>
+            <option value="es">Español (ES)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="ja">日本語 (JP)</option>
+            <option value="hi">हिन्दी (IN)</option>
+          </select>
+        </div>
+        
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container-wrapper">
+    <div class="auth-card" style="padding-top: 50px;">
+      
+      <!-- Admin Login Form -->
+      <div id="admin-login-form-wrapper">
+        <div class="auth-header">
+          <div class="auth-logo">🛡️</div>
+          <h2 class="auth-title" style="color: var(--accent);" data-translate="adminLoginTitle">Admin Control Login</h2>
+          <p class="auth-subtitle" data-translate="adminLoginSub">Authorized Personnel Only — TSMS Command Center</p>
+          <div style="display: inline-block; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-top: 10px; letter-spacing: 1px;">🔒 SECURE GOVERNMENT ACCESS</div>
+        </div>
+
+        <div id="admin-login-error" class="auth-error" style="display:none;"></div>
+
+        <form id="admin-login-form">
+          <div class="auth-form-group">
+            <label for="a-login-user" class="auth-label" data-translate="adminUsername">Admin Username</label>
+            <input type="text" id="a-login-user" class="auth-input" placeholder="username" autocomplete="username" required>
+          </div>
+          <div class="auth-form-group">
+            <label for="a-login-pass" class="auth-label" data-translate="password">Admin Password</label>
+            <div style="position: relative;">
+              <input type="password" id="a-login-pass" class="auth-input" placeholder="Enter admin password" autocomplete="current-password" required style="padding-right: 35px;">
+              <span class="toggle-password" onclick="togglePassword('a-login-pass', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary);">👁️</span>
+            </div>
+          </div>
+
+          <button type="submit" id="a-login-btn" class="auth-submit-btn" style="background: linear-gradient(135deg, #1e3a5f, #0f2d5a); border-color: var(--accent);">🔐 Access Command Center</button>
+        </form>
+
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast notifications alerts overlay -->
+  <div id="toast-notifications-container" class="toast-container"></div>
+
+</body>
+</html>

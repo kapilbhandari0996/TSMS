@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="title">TSMS | Smart Tourist Safety</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Scripts (Mock data loaded first, then core app controller) -->
+  <script src="mockData.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+
+  <!-- Siren Screen Border Overlay Flash -->
+  <div id="siren-active-overlay" class="siren-active-overlay"></div>
+
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo" style="cursor: pointer;" onclick="document.querySelector('[data-view=home]').click()">
+        <div class="logo-icon">🛡️</div>
+        <span>TSMS</span>
+      </div>
+      
+      <!-- Main Navigation -->
+      <nav>
+        <ul class="nav-links">
+          <li><button class="nav-btn active" data-view="home" data-translate="navHome">Home</button></li>
+          <li><button class="nav-btn" data-view="tourist" data-translate="navTourist">Tourist Portal</button></li>
+          <li><button class="nav-btn" data-view="admin" data-translate="navAdmin">Admin Control Center</button></li>
+        </ul>
+      </nav>
+
+      <!-- Language & Theme Settings Controls -->
+      <div class="header-controls">
+        <div class="lang-selector-wrapper">
+          <select id="language-select" aria-label="Language Selector">
+            <option value="en">English (US)</option>
+            <option value="es">Español (ES)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="ja">日本語 (JP)</option>
+            <option value="hi">हिन्दी (IN)</option>
+          </select>
+        </div>
+        
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="theme-toggle-icon">☀️</span>
+        </button>
+
+        <!-- Logout button (shown when logged in) -->
+        <button id="logout-btn" class="btn-secondary" style="display:none; padding: 6px 14px; font-size: 12px; border-color: var(--danger); color: var(--danger);" title="Log Out">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Web Container -->
+  <main class="container">
+    
+    <!-- ==========================================================================
+       1. HOME LANDING PAGE SECTION
+       ========================================================================== -->
+    <section id="home-section" class="page-section active">
+      <div class="hero-section">
+        <div class="hero-badge">
+          <span style="color: var(--safe);">●</span> AI-Enabled Safe Tourism System Active
+        </div>
+        <h1 data-translate="heroTitle">Tourist Safety & Smart Monitoring System</h1>
+        <p data-translate="heroSubtitle">Experience travel with peace of mind. Secure digital identity, intelligent behavior monitoring, and instant emergency response at your fingertips.</p>
+        
+        <div class="hero-buttons">
+          <button class="btn-primary" onclick="document.querySelector('[data-view=tourist]').click()" data-translate="navTourist">Tourist Portal</button>
+          <button class="btn-secondary" onclick="document.querySelector('[data-view=admin]').click()" data-translate="navAdmin">Admin Control Center</button>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🆔</div>
+          <h3 data-translate="idCardTitle" style="margin-bottom: 8px;">Verified Digital Identity</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Get an official digital safety pass verified with a unique Tourist ID and dynamic secure QR codes to streamline access to tourism departments and hotels.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🆘</div>
+          <h3 data-translate="sosTitle" style="margin-bottom: 8px;">Emergency SOS Console</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Instantly broadcast GPS telemetry and emergency categories (medical, accident, security) to command dashboards in less than 3 seconds.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3 data-translate="aiLogs" style="margin-bottom: 8px;">AI Risk Detection</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Continuous telemetry analysis catches unusual speed, geofence breaches, and device inactivity, flagging risks to security dispatchers before they escalate.</p>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Overview -->
+      <div class="landing-stats">
+        <div class="stat-item">
+          <div class="stat-val">12k+</div>
+          <div class="stat-lbl">Tourists Protected</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">&lt; 3s</div>
+          <div class="stat-lbl">SOS Broadcast Speed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">99.8%</div>
+          <div class="stat-lbl">Safety Index Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">24/7</div>
+          <div class="stat-lbl">Active Dispatch</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       2. TOURIST LOGIN PAGE
+       ========================================================================== -->
+    <section id="tourist-login-section" class="page-section auth-section">
+      <div class="auth-card glass-card">
+        <div class="auth-logo">🌍</div>
+        <h2 class="auth-title">Tourist Portal Login</h2>
+        <p class="auth-subtitle">Access your TSMS Safety Pass and Emergency Console</p>
+
+        <div id="tourist-login-error" class="auth-error" style="display:none;"></div>
+
+        <div class="form-group">
+          <label for="t-login-id">Tourist ID (e.g. TSMS-1084)</label>
+          <input type="text" id="t-login-id" placeholder="TSMS-XXXX" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="t-login-pass">Password</label>
+          <input type="password" id="t-login-pass" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+
+        <button id="t-login-btn" class="btn-primary" style="width:100%; margin-top:8px; padding:14px;">🔓 Sign In to Tourist Portal</button>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button id="go-to-kyc-btn" class="btn-secondary" style="width:100%; padding:12px;">📋 New Tourist? Register with KYC →</button>
+
+        <p class="auth-hint">Demo accounts: ID <strong>TSMS-1084</strong>, password <strong>sarah123</strong></p>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       3. TOURIST KYC REGISTRATION WIZARD
+       ========================================================================== -->
+    <section id="kyc-section" class="page-section auth-section">
+      <div class="kyc-wizard glass-card">
+        <!-- Step Progress Bar -->
+        <div class="kyc-progress">
+          <div class="kyc-steps-track">
+            <div class="kyc-step-dot active" data-step="1">1</div>
+            <div class="kyc-step-line"></div>
+            <div class="kyc-step-dot" data-step="2">2</div>
+            <div class="kyc-step-line"></div>
+            <div class="kyc-step-dot" data-step="3">3</div>
+            <div class="kyc-step-line"></div>
+            <div class="kyc-step-dot" data-step="4">4</div>
+            <div class="kyc-step-line"></div>
+            <div class="kyc-step-dot" data-step="5">5</div>
+            <div class="kyc-step-line"></div>
+            <div class="kyc-step-dot" data-step="6">6</div>
+          </div>
+          <div id="kyc-step-label" class="kyc-step-label">Step 1 of 6 — Personal Information</div>
+        </div>
+
+        <!-- STEP 1: Personal Info -->
+        <div class="kyc-step-panel active" id="kyc-step-1">
+          <div class="kyc-step-icon">👤</div>
+          <h3 class="kyc-step-title">Personal Information</h3>
+          <p class="kyc-step-desc">Enter your legal name and basic details as they appear on your passport.</p>
+          <div class="form-group"><label>Full Name *</label><input type="text" id="kyc-fullname" placeholder="e.g. John Michael Doe"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Nationality *</label><input type="text" id="kyc-nationality" placeholder="e.g. United States"></div>
+            <div class="form-group"><label>Date of Birth *</label><input type="date" id="kyc-dob"></div>
+          </div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="kyc-email" placeholder="john.doe@email.com"></div>
+        </div>
+
+        <!-- STEP 2: Documents -->
+        <div class="kyc-step-panel" id="kyc-step-2">
+          <div class="kyc-step-icon">🪪</div>
+          <h3 class="kyc-step-title">Travel Documents</h3>
+          <p class="kyc-step-desc">Provide your passport and visa details exactly as printed on your documents.</p>
+          <div class="form-row">
+            <div class="form-group"><label>Passport Number *</label><input type="text" id="kyc-passport" placeholder="e.g. A1234567"></div>
+            <div class="form-group"><label>Visa Number *</label><input type="text" id="kyc-visa" placeholder="Visa Slip ID"></div>
+          </div>
+          <div class="form-group"><label>Visa Expiration Date *</label><input type="date" id="kyc-visaexpiry"></div>
+          <!-- Simulated document upload -->
+          <div class="kyc-upload-box" id="kyc-upload-box">
+            <span style="font-size:28px;">📄</span>
+            <p style="margin: 8px 0 4px; font-size:13px; font-weight:600;">Upload Passport Scan</p>
+            <p style="font-size:11px; color:var(--text-secondary);">JPG, PNG or PDF — simulated for demo</p>
+            <button class="btn-secondary" style="margin-top:10px; font-size:11px; padding:6px 14px;" onclick="simulateDocUpload()">📤 Select File</button>
+            <div id="kyc-upload-status" style="display:none; color:var(--safe); font-size:12px; margin-top:8px;">✅ Passport scan uploaded successfully</div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Selfie / Face Scan -->
+        <div class="kyc-step-panel" id="kyc-step-3">
+          <div class="kyc-step-icon">📸</div>
+          <h3 class="kyc-step-title">Identity Selfie Verification</h3>
+          <p class="kyc-step-desc">Our AI will compare your face against the passport photo to verify your identity.</p>
+          <div class="kyc-face-scan-wrapper">
+            <div class="kyc-face-frame" id="kyc-face-frame">
+              <div class="kyc-face-scan-ring"></div>
+              <span class="kyc-face-icon">👤</span>
+            </div>
+            <div id="kyc-scan-status" style="font-size:12px; color:var(--text-secondary); margin-top:16px;">Position your face inside the frame</div>
+          </div>
+          <button id="kyc-capture-btn" class="btn-primary" style="width:100%; margin-top:20px; padding:12px;">📸 Capture &amp; Scan Face</button>
+          <div id="kyc-face-result" style="display:none; text-align:center; margin-top:12px; color:var(--safe); font-weight:700;">✅ Identity Verified — Face Match Confirmed</div>
+        </div>
+
+        <!-- STEP 4: Emergency Contact -->
+        <div class="kyc-step-panel" id="kyc-step-4">
+          <div class="kyc-step-icon">🆘</div>
+          <h3 class="kyc-step-title">Emergency Contact</h3>
+          <p class="kyc-step-desc">Who should authorities contact in case of an emergency involving you?</p>
+          <div class="form-group"><label>Contact Full Name *</label><input type="text" id="kyc-emg-name" placeholder="Jane Doe"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone Number *</label><input type="tel" id="kyc-emg-phone" placeholder="+1 555-0199"></div>
+            <div class="form-group"><label>Relationship</label>
+              <select id="kyc-emg-relation" style="width:100%;">
+                <option>Parent</option><option>Spouse</option><option>Sibling</option><option>Friend</option><option>Colleague</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: Set Password -->
+        <div class="kyc-step-panel" id="kyc-step-5">
+          <div class="kyc-step-icon">🔐</div>
+          <h3 class="kyc-step-title">Secure Your Account</h3>
+          <p class="kyc-step-desc">Create a password to protect your TSMS Safety Pass and tourist account.</p>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" id="kyc-password" placeholder="Minimum 6 characters">
+          </div>
+          <div class="form-group">
+            <label>Confirm Password *</label>
+            <input type="password" id="kyc-password-confirm" placeholder="Re-enter your password">
+          </div>
+          <div id="kyc-pw-error" style="display:none; color:var(--danger); font-size:12px;">⚠️ Passwords do not match.</div>
+          <div class="kyc-security-note">
+            🔒 Your password is stored encrypted. TSMS staff cannot view it.
+          </div>
+        </div>
+
+        <!-- STEP 6: KYC Submit / Verification -->
+        <div class="kyc-step-panel" id="kyc-step-6">
+          <div class="kyc-step-icon" id="kyc-final-icon" style="animation: spin 1s linear infinite;">⏳</div>
+          <h3 class="kyc-step-title" id="kyc-final-title">Verifying Your Identity...</h3>
+          <p class="kyc-step-desc" id="kyc-final-desc">Please wait while our AI engine validates your documents and biometrics.</p>
+          <div class="kyc-verify-steps">
+            <div class="kyc-verify-row" id="kyc-v1"><span class="kyc-v-spinner">⏳</span> Document authenticity check</div>
+            <div class="kyc-verify-row" id="kyc-v2"><span class="kyc-v-spinner">⏳</span> Biometric face matching</div>
+            <div class="kyc-verify-row" id="kyc-v3"><span class="kyc-v-spinner">⏳</span> Passport database cross-reference</div>
+            <div class="kyc-verify-row" id="kyc-v4"><span class="kyc-v-spinner">⏳</span> Visa validity confirmation</div>
+          </div>
+          <div id="kyc-success-msg" style="display:none; text-align:center; margin-top:20px;">
+            <div style="font-size:48px; margin-bottom:8px;">✅</div>
+            <div style="color:var(--safe); font-size:18px; font-weight:800;">KYC Verified!</div>
+            <div style="color:var(--text-secondary); font-size:13px; margin-top:4px;">Your Tourist ID has been issued. Redirecting to your dashboard...</div>
+          </div>
+        </div>
+
+        <!-- KYC Navigation Buttons -->
+        <div class="kyc-nav" id="kyc-nav">
+          <button id="kyc-back-btn" class="btn-secondary" style="flex:1;">← Back</button>
+          <button id="kyc-next-btn" class="btn-primary" style="flex:2;">Continue →</button>
+        </div>
+        <button id="kyc-to-login-btn" class="auth-link-btn" style="margin-top:12px;">← Back to Login</button>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       4. TOURIST DASHBOARD SECTION
+       ========================================================================== -->
+    <section id="tourist-section" class="page-section">
+      <div class="tourist-grid">
+
+        <!-- Registered Tourist Dashboard Grid Panel -->
+        <div id="tourist-dashboard-card" class="tourist-grid" style="display: grid; grid-column: span 2;">
+          
+          <!-- Left Column Wrapper -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Identity Display Left -->
+            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+              <div>
+                <h2 class="card-title" data-translate="idCardTitle">Verified Digital Identity</h2>
+                <p class="card-subtitle" data-translate="idCardSubtitle">Official Smart Safety Pass</p>
+              </div>
+              
+              <div class="id-card-wrapper">
+                <!-- Holographic ID Pass -->
+                <div class="smart-id-card">
+                  <div class="id-hologram-line"></div>
+                  <div class="id-header">
+                    <span class="id-logo">🛡️ TSMS PASS</span>
+                    <span id="id-card-status" class="id-badge-status" data-translate="statusSafe">Safe</span>
+                  </div>
+                  <div class="id-body">
+                    <div class="id-photo-container">👤</div>
+                    <div class="id-details">
+                      <div>
+                        <div class="id-lbl" data-translate="fullName">Full Name</div>
+                        <div id="id-card-name" class="id-name">Tourist Name</div>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="nationality">Nationality:</span>
+                        <span id="id-card-nationality" class="id-val">Origin Country</span>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="passportNo">Passport:</span>
+                        <span id="id-card-passport" class="id-val">Passport Number</span>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="touristId">Tourist ID:</span>
+                        <span id="id-card-id" class="id-val" style="color: var(--accent);">ID Code</span>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl">KYC Status:</span>
+                        <span id="id-card-kyc" class="kyc-badge">✅ Verified</span>
+                      </div>
+                    </div>
+                    <div class="id-qr-container">
+                      <canvas id="id-qr-canvas" class="id-qr-canvas" width="80" height="80"></canvas>
+                    </div>
+                  </div>
+                  <div class="id-barcode-container">
+                    <div class="id-barcode"></div>
+                    <span id="id-card-serial" class="id-serial">SN-00000000</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="id-controls">
+                <button id="id-print-btn" class="btn-secondary" data-translate="printId">Print Pass</button>
+              </div>
+            </div>
+
+            <!-- Wearable Device Integration Card -->
+            <div class="glass-card" style="margin-top: 0; margin-bottom: 0; padding: 20px; text-align: left;">
+              <h3 data-translate="wearableTitle" style="font-size: 15px; margin-bottom: 4px;">Smart Wearable Device Integration</h3>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" data-translate="wearableSubtitle">Link smartwatches to monitor vitals in high-risk zones.</p>
+              
+              <div id="wearable-pairing-controls" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <label for="wearable-select" data-translate="wearableSelectLabel" style="font-size: 11px; color: var(--text-secondary); white-space: nowrap;">Choose Device:</label>
+                  <select id="wearable-select" style="padding: 6px 12px; font-size: 13px; margin: 0;" aria-label="Wearable Selector">
+                    <option value="Apple Watch Ultra 2">Apple Watch Ultra 2</option>
+                    <option value="Garmin Fenix 8">Garmin Fenix 8</option>
+                    <option value="Fitbit Sense 2">Fitbit Sense 2</option>
+                    <option value="Samsung Galaxy Watch 6">Samsung Galaxy Watch 6</option>
+                  </select>
+                </div>
+                <button id="wearable-pair-btn" class="btn-primary" style="padding: 8px 16px; font-size: 13px;" data-translate="wearablePairBtn">Pair Smartwatch</button>
+              </div>
+
+              <!-- Wearable Synced Status Panel -->
+              <div id="wearable-synced-status" style="display: none; flex-direction: column; gap: 8px; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; background: rgba(255,255,255,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span id="wearable-status-text" style="font-size: 12px; font-weight: 600; color: var(--safe); display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 14px; display: inline-block;">💓</span>
+                    <span id="wearable-connected-label" data-translate="wearableStatusConnected">Wearable Connected</span>
+                  </span>
+                  <button id="wearable-unpair-btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 8px; font-size: 10px; border-radius: 4px; cursor: pointer;" data-translate="wearableUnpairBtn">Disconnect</button>
+                </div>
+                <div style="display: flex; gap: 15px; font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                  <span>Heart Rate: <strong id="wearable-hr-sync" style="color: var(--danger);">-- bpm</strong></span>
+                  <span>Battery: <strong id="wearable-bat-sync">--%</strong></span>
+                </div>
+                <div style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" id="wearable-highrisk-toggle" style="width: auto; margin: 0;">
+                    <span data-translate="wearableHighRiskMode">High-Risk Mode Automation</span>
+                  </label>
+                  <p style="font-size: 9px; color: var(--text-secondary); margin-left: 20px; margin-top: 4px;" data-translate="wearableHighRiskDesc">Enables automatic fall/heart rate emergency triggers.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SOS Console & Context Right -->
+          <div class="glass-card sos-panel-content">
+            <h2 class="card-title" data-translate="sosTitle">Emergency SOS Console</h2>
+            <p class="card-subtitle" data-translate="sosSubtitle">IN EMERGENCY: Click the SOS button to open the emergency confirmation panel.</p>
+
+            <span class="id-lbl" data-translate="sosTypeLabel" style="margin-bottom: 8px; align-self: flex-start;">Select Incident Category:</span>
+            
+            <!-- SOS Type Selector Grid -->
+            <div class="sos-types-list">
+              <button class="sos-type-btn selected" data-type="medical">
+                <span class="sos-type-icon">🚑</span>
+                <span data-translate="sosMedical">Medical</span>
+              </button>
+              <button class="sos-type-btn" data-type="accident">
+                <span class="sos-type-icon">🚗</span>
+                <span data-translate="sosAccident">Accident</span>
+              </button>
+              <button class="sos-type-btn" data-type="security">
+                <span class="sos-type-icon">👮</span>
+                <span data-translate="sosSecurity">Security</span>
+              </button>
+              <button class="sos-type-btn" data-type="other">
+                <span class="sos-type-icon">⚠️</span>
+                <span data-translate="sosOther">Other</span>
+              </button>
+            </div>
+
+            <!-- Click-to-Trigger SOS Button -->
+            <div class="sos-btn-wrapper">
+              <div class="sos-btn-outer-ring"></div>
+              <svg class="sos-countdown-ring" width="180" height="180">
+                <circle class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="transparent" />
+                <circle id="sos-progress-circle" class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="var(--danger)" stroke-width="6" fill="transparent" transform="rotate(-90 90 90)" />
+              </svg>
+              <button id="sos-trigger-btn" class="sos-trigger-btn" aria-label="Trigger SOS Alert">
+                <span class="sos-trigger-text" data-translate="sosButtonText">SOS HELP</span>
+                <span class="sos-trigger-subtext sos-hold-hint" style="font-size: 9px; opacity: 0.8;">Click to Alert</span>
+              </button>
+            </div>
+
+            <!-- Active Alerts Transmitting panel -->
+            <div id="sos-active-alert" class="sos-status-alert">
+              <span style="font-size: 18px; animation: pulse-red 1s infinite; border-radius: 50%; width: 10px; height: 10px; background-color: white; display: inline-block;"></span>
+              <span>Distress Telemetry Transmitting...</span>
+            </div>
+
+            <button id="sos-cancel-btn" class="cancel-sos-btn" data-sec="5">Cancel SOS (Countdown: 5s)</button>
+
+            <!-- Activity logger settings -->
+            <div class="glass-card" style="width: 100%; margin-top: 30px; margin-bottom: 0; padding: 20px; text-align: left;">
+              <h3 data-translate="activityTitle" style="font-size: 15px; margin-bottom: 4px;">Log Tourist Activity</h3>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" data-translate="activitySubtitle">Help the safety AI understand your context to prevent false alerts.</p>
+              
+              <div style="display: flex; gap: 10px;">
+                <select id="tourist-activity-select" style="padding: 8px 12px; font-size: 13px;" aria-label="Activity Selector">
+                  <option value="resting" data-translate="actResting" selected>Resting / At Hotel</option>
+                  <option value="exploring" data-translate="actExploring">City Walk / Sightseeing</option>
+                  <option value="hiking" data-translate="actHiking">Mountain Trekking / Hiking</option>
+                  <option value="swimming" data-translate="actSwimming">Water Sports / Swimming</option>
+                  <option value="transit" data-translate="actTransit">In Transit / Driving</option>
+                </select>
+                <button id="update-activity-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; white-space: nowrap;" data-translate="logActivityBtn">Update Status</button>
+              </div>
+            </div>
+
+            <!-- Privacy details -->
+            <div style="margin-top: 20px; text-align: left; font-size: 10px; color: var(--text-secondary); line-height: 1.4;">
+              <strong data-translate="privacyTitle">Privacy &amp; Data Encryption:</strong>
+              <span data-translate="privacyText">Your personal details, live coordinates, and check-in logs are encrypted at rest. Location history is purged automatically every 48 hours. Only verified law enforcement and emergency dispatchers can access your details during an active SOS event.</span>
+              <button id="inspect-vault-btn-tourist" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-top: 10px; width: 100%; display: block; border-color: var(--safe); color: var(--safe);" data-translate="vaultInspectBtn">Inspect Storage Vault</button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       5. ADMIN LOGIN PAGE
+       ========================================================================== -->
+    <section id="admin-login-section" class="page-section auth-section">
+      <div class="auth-card glass-card admin-auth-card">
+        <div class="auth-logo">🛡️</div>
+        <h2 class="auth-title" style="color: var(--accent);">Admin Control Login</h2>
+        <p class="auth-subtitle">Authorized Personnel Only — TSMS Command Center</p>
+
+        <div class="admin-auth-badge">🔒 SECURE GOVERNMENT ACCESS</div>
+
+        <div id="admin-login-error" class="auth-error" style="display:none;"></div>
+
+        <div class="form-group">
+          <label for="a-login-user">Admin Username</label>
+          <input type="text" id="a-login-user" placeholder="admin" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="a-login-pass">Admin Password</label>
+          <input type="password" id="a-login-pass" placeholder="Enter admin password" autocomplete="current-password">
+        </div>
+
+        <button id="a-login-btn" class="btn-primary" style="width:100%; margin-top:8px; padding:14px; background: linear-gradient(135deg, #1e3a5f, #0f2d5a);">🔐 Access Command Center</button>
+
+        <p class="auth-hint">Demo credentials: username <strong>admin</strong>, password <strong>admin@tsms123</strong></p>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       6. ADMIN COMMAND & CONTROL DASHBOARD
+       ========================================================================== -->
+          <div style="text-align:center; margin-bottom: 8px;">
+            <span style="font-size: 48px;">🌏</span>
+          </div>
+          <h2 class="card-title" style="text-align:center;" data-translate="welcomeTitle">Welcome to TSMS</h2>
+          <p class="card-subtitle" style="text-align:center;" data-translate="welcomeSubtitle">Enter your name to get started. We'll check if you're already registered.</p>
+
+          <div class="form-group" style="margin-top: 24px;">
+            <label for="welcome-name-input" data-translate="fullName">Full Name</label>
+            <input type="text" id="welcome-name-input" placeholder="e.g. John Doe" autocomplete="name" style="font-size: 16px; padding: 14px 16px;">
+          </div>
+
+          <div id="welcome-error-msg" style="display:none; color: var(--danger); font-size: 12px; margin-top: -8px; margin-bottom: 8px;">⚠️ Please enter your full name to continue.</div>
+
+          <div style="display: flex; gap: 12px; margin-top: 12px;">
+            <button id="welcome-new-btn" class="btn-primary" style="flex:1;" data-translate="welcomeNewBtn">New Registration →</button>
+            <button id="welcome-return-btn" class="btn-secondary" style="flex:1;" data-translate="welcomeReturnBtn">I'm Returning</button>
+          </div>
+
+          <p style="font-size: 10px; color: var(--text-secondary); text-align:center; margin-top: 18px; line-height: 1.5;" data-translate="welcomeNote">Your details are encrypted and shared only with emergency responders.</p>
+        </div>
+
+        <!-- Registration Form Card -->
+        <div id="tourist-register-card" class="glass-card tourist-register-card" style="display:none;">
+          <h2 class="card-title" data-translate="registerTitle">Tourist Safety Registration</h2>
+          <p class="card-subtitle" data-translate="registerSubtitle">Generate your secure digital identity and activate active safety monitoring.</p>
+          
+          <form id="register-form">
+            <div class="form-group">
+              <label for="reg-name" data-translate="fullName">Full Name</label>
+              <input type="text" id="reg-name" required placeholder="John Doe">
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="reg-nation" data-translate="nationality">Nationality</label>
+                <input type="text" id="reg-nation" required placeholder="United States">
+              </div>
+              <div class="form-group">
+                <label for="reg-passport" data-translate="passportNo">Passport Number</label>
+                <input type="text" id="reg-passport" required placeholder="E.g., A1234567">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="reg-visa" data-translate="visaNo">Visa Number</label>
+                <input type="text" id="reg-visa" required placeholder="Visa Slip ID">
+              </div>
+              <div class="form-group">
+                <label for="reg-visa-expiry" data-translate="visaExpiry">Visa Expiration Date</label>
+                <input type="date" id="reg-visa-expiry" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="reg-emergency-name" data-translate="emergencyContactName">Emergency Contact Name</label>
+                <input type="text" id="reg-emergency-name" required placeholder="Jane Doe">
+              </div>
+              <div class="form-group">
+                <label for="reg-emergency-phone" data-translate="emergencyContactPhone">Emergency Contact Phone</label>
+                <input type="tel" id="reg-emergency-phone" required placeholder="+1 555-0199">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" data-translate="registerBtn">Register & Issue Digital ID</button>
+          </form>
+        </div>
+
+        <!-- Registered Tourist Dashboard Grid Panel -->
+        <div id="tourist-dashboard-card" class="tourist-grid" style="display: none; grid-column: span 2;">
+          
+          <!-- Left Column Wrapper -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Identity Display Left -->
+            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+              <div>
+                <h2 class="card-title" data-translate="idCardTitle">Verified Digital Identity</h2>
+                <p class="card-subtitle" data-translate="idCardSubtitle">Official Smart Safety Pass</p>
+              </div>
+              
+              <div class="id-card-wrapper">
+                <!-- Holographic ID Pass -->
+                <div class="smart-id-card">
+                  <div class="id-hologram-line"></div>
+                  <div class="id-header">
+                    <span class="id-logo">🛡️ TSMS PASS</span>
+                    <span id="id-card-status" class="id-badge-status" data-translate="statusSafe">Safe</span>
+                  </div>
+                  <div class="id-body">
+                    <div class="id-photo-container">👤</div>
+                    <div class="id-details">
+                      <div>
+                        <div class="id-lbl" data-translate="fullName">Full Name</div>
+                        <div id="id-card-name" class="id-name">Tourist Name</div>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="nationality">Nationality:</span>
+                        <span id="id-card-nationality" class="id-val">Origin Country</span>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="passportNo">Passport:</span>
+                        <span id="id-card-passport" class="id-val">Passport Number</span>
+                      </div>
+                      <div class="id-row">
+                        <span class="id-lbl" data-translate="touristId">Tourist ID:</span>
+                        <span id="id-card-id" class="id-val" style="color: var(--accent);">ID Code</span>
+                      </div>
+                    </div>
+                    <div class="id-qr-container">
+                      <canvas id="id-qr-canvas" class="id-qr-canvas" width="80" height="80"></canvas>
+                    </div>
+                  </div>
+                  <div class="id-barcode-container">
+                    <div class="id-barcode"></div>
+                    <span id="id-card-serial" class="id-serial">SN-00000000</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="id-controls">
+                <button id="id-print-btn" class="btn-secondary" data-translate="printId">Print Pass</button>
+              </div>
+            </div>
+
+            <!-- Wearable Device Integration Card -->
+            <div class="glass-card" style="margin-top: 0; margin-bottom: 0; padding: 20px; text-align: left;">
+              <h3 data-translate="wearableTitle" style="font-size: 15px; margin-bottom: 4px;">Smart Wearable Device Integration</h3>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" data-translate="wearableSubtitle">Link smartwatches to monitor vitals in high-risk zones.</p>
+              
+              <div id="wearable-pairing-controls" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <label for="wearable-select" data-translate="wearableSelectLabel" style="font-size: 11px; color: var(--text-secondary); white-space: nowrap;">Choose Device:</label>
+                  <select id="wearable-select" style="padding: 6px 12px; font-size: 13px; margin: 0;" aria-label="Wearable Selector">
+                    <option value="Apple Watch Ultra 2">Apple Watch Ultra 2</option>
+                    <option value="Garmin Fenix 8">Garmin Fenix 8</option>
+                    <option value="Fitbit Sense 2">Fitbit Sense 2</option>
+                    <option value="Samsung Galaxy Watch 6">Samsung Galaxy Watch 6</option>
+                  </select>
+                </div>
+                <button id="wearable-pair-btn" class="btn-primary" style="padding: 8px 16px; font-size: 13px;" data-translate="wearablePairBtn">Pair Smartwatch</button>
+              </div>
+
+              <!-- Wearable Synced Status Panel (Initially hidden) -->
+              <div id="wearable-synced-status" style="display: none; flex-direction: column; gap: 8px; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; background: rgba(255,255,255,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span id="wearable-status-text" style="font-size: 12px; font-weight: 600; color: var(--safe); display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 14px; display: inline-block;">💓</span>
+                    <span id="wearable-connected-label" data-translate="wearableStatusConnected">Wearable Connected</span>
+                  </span>
+                  <button id="wearable-unpair-btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 8px; font-size: 10px; border-radius: 4px; cursor: pointer;" data-translate="wearableUnpairBtn">Disconnect</button>
+                </div>
+                <div style="display: flex; gap: 15px; font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                  <span>Heart Rate: <strong id="wearable-hr-sync" style="color: var(--danger);">-- bpm</strong></span>
+                  <span>Battery: <strong id="wearable-bat-sync">--%</strong></span>
+                </div>
+                <div style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" id="wearable-highrisk-toggle" style="width: auto; margin: 0;">
+                    <span data-translate="wearableHighRiskMode">High-Risk Mode Automation</span>
+                  </label>
+                  <p style="font-size: 9px; color: var(--text-secondary); margin-left: 20px; margin-top: 4px;" data-translate="wearableHighRiskDesc">Enables automatic fall/heart rate emergency triggers.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SOS Console & Context Right -->
+          <div class="glass-card sos-panel-content">
+            <h2 class="card-title" data-translate="sosTitle">Emergency SOS Console</h2>
+            <p class="card-subtitle" data-translate="sosSubtitle">IN EMERGENCY: Press and hold the SOS button for 3 seconds to alert local authorities.</p>
+
+            <span class="id-lbl" data-translate="sosTypeLabel" style="margin-bottom: 8px; align-self: flex-start;">Select Incident Category:</span>
+            
+            <!-- SOS Type Selector Grid -->
+            <div class="sos-types-list">
+              <button class="sos-type-btn selected" data-type="medical">
+                <span class="sos-type-icon">🚑</span>
+                <span data-translate="sosMedical">Medical</span>
+              </button>
+              <button class="sos-type-btn" data-type="accident">
+                <span class="sos-type-icon">🚗</span>
+                <span data-translate="sosAccident">Accident</span>
+              </button>
+              <button class="sos-type-btn" data-type="security">
+                <span class="sos-type-icon">👮</span>
+                <span data-translate="sosSecurity">Security</span>
+              </button>
+              <button class="sos-type-btn" data-type="other">
+                <span class="sos-type-icon">⚠️</span>
+                <span data-translate="sosOther">Other</span>
+              </button>
+            </div>
+
+            <!-- Concentric Pulse Trigger Ring -->
+            <div class="sos-btn-wrapper">
+              <div class="sos-btn-outer-ring"></div>
+              
+              <!-- Countdown SVG Circle -->
+              <svg class="sos-countdown-ring" width="180" height="180">
+                <circle class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="transparent" />
+                <circle id="sos-progress-circle" class="sos-countdown-circle" cx="90" cy="90" r="80" stroke="var(--danger)" stroke-width="6" fill="transparent" transform="rotate(-90 90 90)" />
+              </svg>
+              
+              <!-- Core Hold Trigger Button -->
+              <button id="sos-trigger-btn" class="sos-trigger-btn" aria-label="Trigger SOS Alert">
+                <span class="sos-trigger-text" data-translate="sosButtonText">SOS HELP</span>
+                <span id="sos-hold-countdown" class="sos-trigger-subtext" style="font-size: 14px; font-weight: 900; opacity: 0.9; display: none;">3</span>
+                <span class="sos-trigger-subtext sos-hold-hint" style="font-size: 8px; opacity: 0.7;">Hold 3s</span>
+              </button>
+            </div>
+
+            <!-- Active Alerts Transmitting panel -->
+            <div id="sos-active-alert" class="sos-status-alert">
+              <span style="font-size: 18px; animation: pulse-red 1s infinite; border-radius: 50%; width: 10px; height: 10px; background-color: white; display: inline-block;"></span>
+              <span>Distress Telemetry Transmitting...</span>
+            </div>
+
+            <button id="sos-cancel-btn" class="cancel-sos-btn" data-sec="5">Cancel SOS (Countdown: 5s)</button>
+
+            <!-- Activity logger settings -->
+            <div class="glass-card" style="width: 100%; margin-top: 30px; margin-bottom: 0; padding: 20px; text-align: left;">
+              <h3 data-translate="activityTitle" style="font-size: 15px; margin-bottom: 4px;">Log Tourist Activity</h3>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" data-translate="activitySubtitle">Help the safety AI understand your context to prevent false alerts.</p>
+              
+              <div style="display: flex; gap: 10px;">
+                <select id="tourist-activity-select" style="padding: 8px 12px; font-size: 13px;" aria-label="Activity Selector">
+                  <option value="resting" data-translate="actResting" selected>Resting / At Hotel</option>
+                  <option value="exploring" data-translate="actExploring">City Walk / Sightseeing</option>
+                  <option value="hiking" data-translate="actHiking">Mountain Trekking / Hiking</option>
+                  <option value="swimming" data-translate="actSwimming">Water Sports / Swimming</option>
+                  <option value="transit" data-translate="actTransit">In Transit / Driving</option>
+                </select>
+                <button id="update-activity-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; white-space: nowrap;" data-translate="logActivityBtn">Update Status</button>
+              </div>
+            </div>
+
+            <!-- Privacy details -->
+            <div style="margin-top: 20px; text-align: left; font-size: 10px; color: var(--text-secondary); line-height: 1.4;">
+              <strong data-translate="privacyTitle">Privacy & Data Encryption:</strong>
+              <span data-translate="privacyText">Your personal details, live coordinates, and check-in logs are encrypted at rest. Location history is purged automatically every 48 hours. Only verified law enforcement and emergency dispatchers can access your details during an active SOS event.</span>
+              <button id="inspect-vault-btn-tourist" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-top: 10px; width: 100%; display: block; border-color: var(--safe); color: var(--safe);" data-translate="vaultInspectBtn">Inspect Storage Vault</button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       3. ADMIN COMMAND & CONTROL DASHBOARD
+       ========================================================================== -->
+    <section id="admin-section" class="page-section">
+      
+      <!-- Metrics row -->
+      <div class="metrics-row">
+        <!-- Metric 1 -->
+        <div class="metric-card">
+          <div class="metric-icon-box" style="background-color: var(--accent-glow); color: var(--accent);">👤</div>
+          <div class="metric-info">
+            <span id="metric-tourists-val" class="metric-value">0</span>
+            <span class="metric-label" data-translate="metricTourists">Active Tourists</span>
+          </div>
+        </div>
+
+        <!-- Metric 2 -->
+        <div id="metric-sos-card" class="metric-card">
+          <div id="metric-sos-icon-box" class="metric-icon-box" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">🚨</div>
+          <div class="metric-info">
+            <span id="metric-sos-val" class="metric-value">0</span>
+            <span class="metric-label" data-translate="metricSOS">Active SOS</span>
+          </div>
+        </div>
+
+        <!-- Metric 3 -->
+        <div class="metric-card">
+          <div class="metric-icon-box" style="background-color: var(--warning-glow); color: var(--warning);">🤖</div>
+          <div class="metric-info">
+            <span id="metric-risk-val" class="metric-value">0</span>
+            <span class="metric-label" data-translate="metricRisk">AI Threat Flags</span>
+          </div>
+        </div>
+
+        <!-- Metric 4 -->
+        <div class="metric-card">
+          <div class="metric-icon-box" style="background-color: var(--safe-glow); color: var(--safe);">🛡️</div>
+          <div class="metric-info">
+            <span id="metric-index-val" class="metric-value">100%</span>
+            <span class="metric-label" data-translate="metricIndex">Safety Index</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Admin Operations Grid -->
+      <div class="admin-grid">
+        
+        <!-- Live Map Console Left -->
+        <div class="glass-card" style="padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div>
+              <h2 class="card-title" data-translate="viewMap" style="margin-bottom: 2px;">Live Safety Map</h2>
+              <span class="card-subtitle" data-translate="mapLegend" style="margin: 0; font-size: 11px;">Interactive Geofence & Tracker Map</span>
+            </div>
+            <button id="mute-siren-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 11px;">🔊 Siren Sound</button>
+          </div>
+
+          <div class="map-container">
+            <!-- Simulated Scanning Radar Glow -->
+            <div class="map-radar-glow"></div>
+            
+            <!-- Regional SVG Map -->
+            <svg class="svg-map" viewBox="0 0 670 480">
+              <!-- Grid Overlay -->
+              <defs>
+                <pattern id="map-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1"/>
+                </pattern>
+                <radialGradient id="ocean-gradient" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#0f172a" />
+                  <stop offset="100%" stop-color="#090d16" />
+                </radialGradient>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#ocean-gradient)" />
+              <rect width="100%" height="100%" fill="url(#map-grid)" />
+              
+              <!-- Map Contours (Islands & Mountain ranges) -->
+              <!-- Coastal Geofence Zone -->
+              <path d="M50,100 Q150,50 300,120 T550,80 L620,200 Q650,300 500,420 T200,450 Z" fill="#13233c" stroke="rgba(16, 185, 129, 0.2)" stroke-width="2" />
+              <!-- Safe Mountain Geofence Zone -->
+              <path d="M350,150 L520,130 L550,280 L380,310 Z" fill="rgba(59, 130, 246, 0.05)" stroke="rgba(59, 130, 246, 0.2)" stroke-width="1.5" stroke-dasharray="4,4" />
+              
+              <!-- Paths / Trails -->
+              <path d="M220,350 L380,220 L480,110" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="5,5" />
+              <path d="M180,120 L220,350 L550,410" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="5,5" />
+
+              <!-- Landmarks / Region text labels -->
+              <text x="210" y="380" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Seaside Resort</text>
+              <text x="140" y="100" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Central City Sector</text>
+              <text x="440" y="270" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Mountain Ridge</text>
+              <text x="450" y="80" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">High-Risk Canyon</text>
+              <text x="560" y="440" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Deep Water Marina</text>
+
+              <!-- Safe Zone Boundary Ring -->
+              <circle cx="220" cy="350" r="100" fill="none" stroke="var(--safe)" stroke-width="1" stroke-opacity="0.2" />
+              <circle cx="180" cy="120" r="80" fill="none" stroke="var(--safe)" stroke-width="1" stroke-opacity="0.2" />
+
+              <!-- Pins are injected dynamically via JavaScript here -->
+              <g id="map-active-pins"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Emergency dispatch logs queue Right -->
+        <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column;">
+          <h2 class="card-title" data-translate="liveSosFeed">Live Emergency Dispatch</h2>
+          <p class="card-subtitle" style="margin-bottom: 20px;">Direct coordination channel with active SOS callers.</p>
+          
+          <div id="sos-alert-feed" class="sos-alert-feed">
+            <!-- SOS Dispatch Incident Cards injected here -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI Behavioral Logs & Tourist Registry Row -->
+      <div class="admin-grid">
+        
+        <!-- AI Alert Records Left -->
+        <div class="glass-card" style="padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 class="card-title" data-translate="aiLogs" style="margin: 0;">AI Behavior Detection Logs</h2>
+            <span style="font-size: 11px; color: var(--safe); font-weight: 500; display: flex; align-items: center; gap: 5px;">
+              <span style="animation: pulse-red 1s infinite; width: 6px; height: 6px; border-radius: 50%; background-color: var(--safe); display: inline-block;"></span>
+              <span data-translate="aiAnalysisActive">Analyzing Telemetry</span>
+            </span>
+          </div>
+          
+          <div id="ai-alerts-panel" class="ai-alerts-panel">
+            <!-- AI Warnings log elements injected here -->
+          </div>
+        </div>
+
+        <!-- Reports, Analytics and Exports Panel Right -->
+        <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h2 class="card-title" data-translate="exportReport">Export Reports & Data</h2>
+            <p class="card-subtitle" style="margin-bottom: 15px;">Review safety index stats and download regulatory operational logs.</p>
+          </div>
+
+          <!-- Mini charts grid inside Reports card -->
+          <div class="reports-layout">
+            <!-- Incidents type bar counts -->
+            <div class="chart-wrapper">
+              <span class="chart-title">Incidents By Type</span>
+              <div id="incident-chart-container" class="svg-chart-container"></div>
+            </div>
+
+            <!-- Tourist safety status donut -->
+            <div class="chart-wrapper">
+              <span class="chart-title">Safety Status Distribution</span>
+              <div id="safety-chart-container" class="svg-chart-container"></div>
+            </div>
+          </div>
+
+          <div class="reports-actions-row">
+            <button id="report-download-csv" class="btn-primary" style="flex: 1; padding: 12px; font-size: 12px;">Download CSV Registry</button>
+            <button id="report-download-txt" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px;">Download Audit Text Log</button>
+            <button id="inspect-vault-btn-admin" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px; border-color: var(--safe); color: var(--safe);" data-translate="vaultInspectBtn">Inspect Storage Vault</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- General Tourist Registry Directory List (Full Width Table) -->
+      <div class="glass-card directory-section">
+        <div class="directory-header">
+          <div>
+            <h2 class="card-title" data-translate="touristDirectory">Tourist Safety Registry</h2>
+            <p class="card-subtitle" style="margin: 0;">Full database of monitored travelers in this region.</p>
+          </div>
+          
+          <div class="directory-controls">
+            <input type="text" id="tourist-search" class="search-input" data-translate="searchPlaceholder" placeholder="Search by ID, name, or nationality...">
+          </div>
+        </div>
+
+        <div class="registry-table-wrapper">
+          <table class="registry-table">
+            <thead>
+              <tr>
+                <th data-translate="touristId">Tourist ID</th>
+                <th data-translate="fullName">Name</th>
+                <th data-translate="nationality">Nationality</th>
+                <th data-translate="activitySelect">Current Activity</th>
+                <th data-translate="statusLabel">Status</th>
+                <th style="width: 80px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="registry-table-body">
+              <!-- Active directory rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </section>
+
+  </main>
+
+    <!-- ==========================================================================
+       7. FIXED OVERLAY DETAIL PANEL (ADMIN SIDE OVERLAY VIEW)
+       ========================================================================== -->
+  <aside id="tourist-detail-panel" class="tourist-detail-panel" aria-label="Tourist Details Panel">
+    <div class="detail-header">
+      <h2 id="detail-id" style="font-family: var(--font-display); color: var(--accent);">TSMS-1000</h2>
+      <button id="close-detail-panel-btn" class="btn-icon" data-translate="closeDetails" title="Close Panel">✕</button>
+    </div>
+
+    <div class="detail-avatar">👤</div>
+    <h3 id="detail-name" style="text-align: center; font-size: 20px; margin-bottom: 5px;">Tourist Full Name</h3>
+    <div style="text-align: center; margin-bottom: 25px;">
+      <span id="detail-status-val" class="status-badge Safe">Safe</span>
+    </div>
+
+    <!-- Personal details -->
+    <div class="detail-section-title">Personal Profiles</div>
+    
+    <div class="detail-row">
+      <span class="detail-label" data-translate="nationality">Nationality:</span>
+      <span id="detail-nationality" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label" data-translate="passportNo">Passport Number:</span>
+      <span id="detail-passport" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label" data-translate="visaNo">Visa Number:</span>
+      <span id="detail-visa" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label" data-translate="visaExpiry">Visa Expiry Date:</span>
+      <span id="detail-visa-expiry" class="detail-value">-</span>
+    </div>
+
+    <!-- Emergency contacts -->
+    <div class="detail-section-title">Emergency Contexts</div>
+    
+    <div class="detail-row">
+      <span class="detail-label" data-translate="emergencyContactName">Contact Name:</span>
+      <span id="detail-emergency-name" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label" data-translate="emergencyContactPhone">Contact Phone:</span>
+      <span id="detail-emergency-phone" class="detail-value">-</span>
+    </div>
+
+    <!-- Active telemetry status -->
+    <div class="detail-section-title">AI Telemetry Stream</div>
+    
+    <div class="detail-row">
+      <span class="detail-label" data-translate="activitySelect">Current Activity:</span>
+      <span id="detail-activity-val" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Heart Rate Telemetry:</span>
+      <span id="detail-hr-val" class="detail-value" style="color: var(--danger); font-weight: bold;">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Velocity Speed:</span>
+      <span id="detail-speed-val" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Device Battery:</span>
+      <span id="detail-battery-val" class="detail-value">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Telemetry Last Sync:</span>
+      <span id="detail-updated-val" class="detail-value">-</span>
+    </div>
+
+    <!-- Breadcrumb check-in tracking history -->
+    <div class="detail-section-title">Geofence Trail Log</div>
+    <div id="detail-path-logs" class="path-log-list">
+      <!-- Logs injected dynamically here -->
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+     5. SECURE STORAGE VAULT SLIDER PANEL (ENCRYPTION AUDIT SCREEN)
+     ========================================================================== -->
+  <aside id="vault-detail-panel" class="tourist-detail-panel" aria-label="Secure Encryption Vault Panel">
+    <div class="detail-header">
+      <h2 id="vault-panel-title" data-translate="vaultTitle" style="font-family: var(--font-display); color: var(--safe);">Secure Encryption Vault</h2>
+      <button id="close-vault-panel-btn" class="btn-icon" title="Close Panel">✕</button>
+    </div>
+    
+    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 20px;" data-translate="vaultSubtitle">Real-time sandbox data storage audit at rest.</p>
+
+    <!-- Raw storage string box -->
+    <div style="margin-bottom: 20px;">
+      <span class="detail-label" data-translate="vaultLabelRaw" style="display: block; font-weight: bold; margin-bottom: 8px; font-size: 11px;">Encrypted Storage (AES-256 Mock Cipher):</span>
+      <div id="vault-raw-payload" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 10px; word-break: break-all; color: var(--warning); max-height: 160px; overflow-y: auto;">
+        [Obfuscated Cipher Hash Code]
+      </div>
+    </div>
+
+    <!-- Decrypted view preview -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="detail-label" data-translate="vaultLabelDecrypted" style="font-weight: bold; font-size: 11px;">Authorized Decrypted Plaintext:</span>
+        <button id="vault-decrypt-btn" class="btn-primary" style="padding: 4px 8px; font-size: 10px; border-radius: 4px;" data-translate="decryptPreview">Decrypt Preview</button>
+      </div>
+      <div id="vault-decrypted-payload" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 10px; color: var(--safe); max-height: 220px; overflow-y: auto; white-space: pre-wrap;">
+        [LOCKED - Click Decrypt to Authenticate Session Key]
+      </div>
+    </div>
+
+    <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 15px; font-size: 9px; color: var(--text-secondary); line-height: 1.4; display: flex; gap: 8px; align-items: flex-start;">
+      <span>🔒</span>
+      <span data-translate="vaultLockText">Database secured with Sandbox Cipher Key. Only authorized dispatchers can view decrypted parameters.</span>
+    </div>
+  </aside>
+
+  <!-- SOS Confirmation Modal -->
+  <div id="sos-confirm-modal" class="sos-modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="SOS Confirmation">
+    <div class="sos-modal-card">
+      <div class="sos-modal-siren">🚨</div>
+      <h2 class="sos-modal-title">CONFIRM SOS ALERT?</h2>
+      <p class="sos-modal-subtitle">This will immediately notify emergency dispatchers of your location and distress.</p>
+
+      <div class="sos-modal-detail">
+        <div class="sos-modal-row"><span>Tourist:</span> <strong id="sos-modal-name">—</strong></div>
+        <div class="sos-modal-row"><span>Incident Type:</span> <strong id="sos-modal-type">—</strong></div>
+        <div class="sos-modal-row"><span>Tourist ID:</span> <strong id="sos-modal-id">—</strong></div>
+      </div>
+
+      <button id="sos-modal-confirm-btn" class="sos-modal-confirm-btn">🆘 CONFIRM — SEND SOS ALERT NOW</button>
+      <button id="sos-modal-cancel-btn" class="sos-modal-cancel-btn">✕ Cancel — False Alarm</button>
+    </div>
+  </div>
+
+  <!-- Toast notifications alerts console overlay -->
+  <div id="toast-notifications-container" class="toast-container"></div>
+
+</body>
+</html>
