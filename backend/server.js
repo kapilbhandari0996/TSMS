@@ -15,6 +15,30 @@ const { generateToken, verifyToken, requireRole } = require("./authMiddleware");
 const { startAnomalyEngine, setBroadcastCallback } = require("./anomalyEngine");
 const { pool } = require("./db");
 
+// ===== TEMP DATABASE DEBUG =====
+(async () => {
+  try {
+    const dbInfo = await pool.query(`
+      SELECT current_database(), current_schema();
+    `);
+    console.log("[DB INFO]", dbInfo.rows);
+    const tables = await pool.query(`
+      SELECT tablename
+      FROM pg_tables
+      WHERE schemaname = 'public'
+      ORDER BY tablename;
+    `);
+    console.log("[DB TABLES]", tables.rows);
+    const aiAlerts = await pool.query(`
+      SELECT COUNT(*) FROM ai_alerts;
+    `);
+    console.log("[AI ALERTS TABLE EXISTS]", aiAlerts.rows);
+  } catch (err) {
+    console.error("[DB CHECK ERROR]", err);
+  }
+})();
+// ===== END TEMP DATABASE DEBUG =====
+
 const PORT = 3001;
 const UPLOADS_DIR = path.join(__dirname, "uploads", "kyc");
 
@@ -746,8 +770,8 @@ function startServerAISimulation() {
 server.listen(PORT, () => {
   console.log("==================================================");
   console.log("  TSMS FULL-STACK BACKEND STARTED SUCCESSFULLY   ");
-  console.log(`  REST API Port: http://0.0.0.0:${PORT}        `);
-  console.log(`  WebSocket URL: ws://0.0.0.0:${PORT}          `);
+  console.log(`  REST API Port: http://localhost:${PORT}        `);
+  console.log(`  WebSocket URL: ws://localhost:${PORT}          `);
   console.log("==================================================");
   startServerAISimulation();
   startAnomalyEngine(10000); // Check for AI Alerts every 10 seconds (for testing)
