@@ -85,8 +85,8 @@ async function getSystemState() {
   const aiAlertsRes = await pool.query("SELECT * FROM ai_alerts ORDER BY created_at DESC");
 
   const tourists = touristsRes.rows.map(t => ({
-    id: t.id,
-    fullName: t.tourist_name,
+    id: t.tourist_id || t.id.toString(),
+    fullName: t.full_name,
     email: decrypt(t.email),
     dateOfBirth: t.date_of_birth ? t.date_of_birth.toISOString().split("T")[0] : "",
     nationality: t.nationality,
@@ -111,7 +111,7 @@ async function getSystemState() {
   const incidents = incidentsRes.rows.map(i => ({
     id: i.id,
     touristId: i.tourist_id,
-    touristName: i.tourist_name,
+    touristName: i.full_name,
     type: i.type,
     location: i.location,
     timestamp: i.timestamp,
@@ -239,13 +239,18 @@ app.post("/api/auth/tourist", async (req, res) => {
       return res.status(401).json({ error: "Incorrect password." });
     }
 
-    const token = generateToken(t, "Tourist");
+    const userObj = {
+      id: t.tourist_id || t.id.toString(),
+      fullName: t.full_name || "Unknown",
+      email: decrypt(t.email)
+    };
+    const token = generateToken(userObj, "Tourist");
     res.cookie('tsms_jwt', token, { httpOnly: true, maxAge: 12 * 60 * 60 * 1000 });
-    logAudit(t.id, "Tourist", "Successful login", req.ip);
+    logAudit(userObj.id, "Tourist", "Successful login", req.ip);
 
     // Return KYC status so frontend can handle pending/rejected states
     const safeTourist = {
-      id: t.id, fullName: t.tourist_name, email: decrypt(t.email),
+      id: t.id, fullName: t.full_name, email: decrypt(t.email),
       dateOfBirth: t.date_of_birth ? t.date_of_birth.toISOString().split("T")[0] : "",
       nationality: t.nationality, passportNo: decrypt(t.passport_no), visaNo: decrypt(t.visa_no),
       visaExpiry: t.visa_expiry ? t.visa_expiry.toISOString().split("T")[0] : "",
@@ -258,7 +263,17 @@ app.post("/api/auth/tourist", async (req, res) => {
       lastUpdated: t.last_updated, checkinHistory: t.checkin_history
     };
     console.log(`[AUTH] Tourist login: ${safeTourist.fullName} (${safeTourist.id})`);
-    res.json({ success: true, tourist: safeTourist });
+    res.json({ 
+      success: true, 
+      token,
+      user: {
+        id: t.tourist_id || t.id.toString(),
+        name: t.full_name || "Unknown",
+        role: "Tourist",
+        email: decrypt(t.email)
+      },
+      tourist: safeTourist
+    });
   } catch (err) {
     console.error("[AUTH] Error:", err);
     res.status(500).json({ error: "Database auth failure." });
@@ -282,11 +297,26 @@ app.post("/api/auth/admin", async (req, res) => {
       return res.status(401).json({ error: "Invalid admin credentials." });
     }
     
-    const token = generateToken(adminUser, adminUser.role);
+    const userObj = {
+      id: adminUser.id ? adminUser.id.toString() : adminUser.username,
+      fullName: adminUser.full_name || adminUser.username || "Unknown",
+      email: adminUser.username
+    };
+    const token = generateToken(userObj, adminUser.role);
     res.cookie('tsms_jwt', token, { httpOnly: true, maxAge: 12 * 60 * 60 * 1000 });
-    logAudit(adminUser.id, adminUser.role, "Successful admin login", req.ip);
+    logAudit(userObj.id, adminUser.role, "Successful admin login", req.ip);
     
-    res.json({ success: true, admin: { username: adminUser.username, fullName: adminUser.full_name, role: adminUser.role } });
+    res.json({ 
+      success: true, 
+      token,
+      user: {
+        id: adminUser.id ? adminUser.id.toString() : adminUser.username,
+        name: adminUser.full_name || adminUser.username || "Unknown",
+        role: adminUser.role,
+        email: adminUser.username
+      },
+      admin: { username: adminUser.username, fullName: adminUser.full_name, role: adminUser.role } 
+    });
   } catch (err) {
     res.status(500).json({ error: "Database error." });
   }
@@ -471,7 +501,7 @@ app.post("/api/kyc/submit", async (req, res) => {
     // Insert tourist with Pending status
     await pool.query(`
       INSERT INTO tourists (
-        id, tourist_name, email, password_hash, date_of_birth, nationality,
+        id, full_name, email, password_hash, date_of_birth, nationality,
         passport_no, passport_expiry, visa_no, visa_expiry,
         emergency_contact_name, emergency_contact_phone,
         emergency_contact_name_2, emergency_contact_phone_2,
@@ -538,7 +568,7 @@ app.post("/api/kyc/submit", async (req, res) => {
 app.get("/api/admin/kyc", async (req, res) => {
   try {
     const q = await pool.query(`
-      SELECT ks.*, t.tourist_name, t.email, t.mobile_number, t.passport_no, t.nationality, t.kyc_rejection_reason
+      SELECT ks.*, t.full_name, t.email, t.mobile_number, t.passport_no, t.nationality, t.kyc_rejection_reason
       FROM kyc_submissions ks
       JOIN tourists t ON ks.tourist_id = t.id
       ORDER BY ks.submitted_at DESC
@@ -547,7 +577,7 @@ app.get("/api/admin/kyc", async (req, res) => {
     const submissions = q.rows.map(r => ({
       id: r.id,
       touristId: r.tourist_id,
-      fullName: r.tourist_name,
+      fullName: r.full_name,
       email: r.email,
       mobileNumber: r.mobile_number,
       passportNo: r.passport_no,
@@ -718,9 +748,9 @@ app.post("/api/sos", async (req, res) => {
     const incId = "INC-" + Math.floor(1000 + Math.random() * 9000);
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const loc = location || (tourist.activity?.includes("Hiking") ? "Wilderness Trail Grid X4" : "Coastal Sector X2");
-    await pool.query("INSERT INTO incidents (id, tourist_id, tourist_name, type, location, created_at, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
-      [incId, touristId, tourist.tourist_name, incidentType, loc, new Date(), timestamp]);
-    console.log(`[API] SOS TRIGGERED: ${tourist.tourist_name} (${touristId}) - ${incidentType}`);
+    await pool.query("INSERT INTO incidents (id, tourist_id, full_name, type, location, created_at, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
+      [incId, touristId, tourist.full_name, incidentType, loc, new Date(), timestamp]);
+    console.log(`[API] SOS TRIGGERED: ${tourist.full_name} (${touristId}) - ${incidentType}`);
     const state = await getSystemState();
     const newSos = state.incidents.find(i => i.id === incId);
     broadcast({ type: "sos_triggered", incident: newSos, state });
@@ -734,11 +764,11 @@ app.post("/api/sos", async (req, res) => {
 app.post("/api/sos/cancel", async (req, res) => {
   const { touristId } = req.body;
   try {
-    const q = await pool.query("SELECT tourist_name FROM tourists WHERE id = $1", [touristId]);
+    const q = await pool.query("SELECT full_name FROM tourists WHERE id = $1", [touristId]);
     if (q.rowCount === 0) return res.status(404).json({ error: "Tourist not found." });
     await pool.query("UPDATE tourists SET status = 'Safe', activity = 'Resting / At Hotel', heart_rate = 72, speed = 0, last_updated = 'Just now' WHERE id = $1", [touristId]);
     await pool.query("UPDATE incidents SET status = 'Resolved' WHERE tourist_id = $1 AND status = 'Active'", [touristId]);
-    console.log(`[API] SOS Stand-down for: ${q.rows[0].tourist_name} (${touristId})`);
+    console.log(`[API] SOS Stand-down for: ${q.rows[0].full_name} (${touristId})`);
     const state = await getSystemState();
     broadcast({ type: "sos_resolved", touristId, state });
     res.json({ status: "Stand-down complete", tourist: state.tourists.find(t => t.id === touristId) });

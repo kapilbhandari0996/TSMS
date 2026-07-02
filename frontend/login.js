@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEYS = {
     LANGUAGE: "tsms_lang",
     THEME: "tsms_theme",
-    ACTIVE_TOURIST_ID: "tsms_active_id"
+    ACTIVE_TOURIST_ID: "tsms_active_id",
+    TSMS_TOKEN: "tsms_token"
   };
 
   const TOTAL_KYC_STEPS = 7;

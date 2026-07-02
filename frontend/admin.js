@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEYS = {
     LANGUAGE: "tsms_lang",
     THEME: "tsms_theme",
-    ADMIN_LOGGED_IN: "tsms_admin_logged_in"
+    ADMIN_LOGGED_IN: "tsms_admin_logged_in",
+    TSMS_TOKEN: "tsms_token"
   };
 
   // --- INITIALIZE APPLICATION ---

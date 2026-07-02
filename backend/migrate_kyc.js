@@ -80,6 +80,7 @@ async function migrate() {
       `CREATE TABLE IF NOT EXISTS incidents (
         id VARCHAR(50) PRIMARY KEY,
         tourist_id VARCHAR(50) REFERENCES tourists(id) ON DELETE CASCADE,
+        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         type VARCHAR(100),
         location VARCHAR(100),
@@ -87,6 +88,7 @@ async function migrate() {
         timestamp VARCHAR(50),
         status VARCHAR(50) DEFAULT 'Active' )`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`,
+      `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`,
@@ -96,6 +98,7 @@ async function migrate() {
       `CREATE TABLE IF NOT EXISTS ai_alerts (
         id VARCHAR(50) PRIMARY KEY,
         tourist_id VARCHAR(50) REFERENCES tourists(id) ON DELETE CASCADE,
+        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         risk_level VARCHAR(50),
         reason TEXT,
@@ -106,6 +109,7 @@ async function migrate() {
         remarks TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP )`,
       `ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`,
+      `ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`,
       `ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`,
       `ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS risk_level VARCHAR(50)`,
       `ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS reason TEXT`,

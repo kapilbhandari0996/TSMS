@@ -89,6 +89,7 @@ async function init() {
       CREATE TABLE IF NOT EXISTS incidents (
         id VARCHAR(50) PRIMARY KEY,
         tourist_id VARCHAR(50) REFERENCES tourists(id) ON DELETE CASCADE,
+        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         type VARCHAR(100),
         location VARCHAR(100),
@@ -98,6 +99,7 @@ async function init() {
       )
     `);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`);
@@ -110,6 +112,7 @@ async function init() {
       CREATE TABLE IF NOT EXISTS ai_alerts (
         id VARCHAR(50) PRIMARY KEY,
         tourist_id VARCHAR(50) REFERENCES tourists(id) ON DELETE CASCADE,
+        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         risk_level VARCHAR(50),
         reason TEXT,
@@ -122,6 +125,7 @@ async function init() {
       )
     `);
     await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`);
+    await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
     await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS risk_level VARCHAR(50)`);
     await client.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS reason TEXT`);
@@ -201,14 +205,14 @@ async function init() {
           
           await client.query(`
             INSERT INTO tourists (
-              id, tourist_name, email, password_hash, date_of_birth, nationality,
-              passport_no, visa_no, visa_expiry, emergency_contact_name, 
+              id, full_name, email, password_hash, date_of_birth, nationality,
+              passport_no, passport_expiry, visa_no, visa_expiry, emergency_contact_name, 
               emergency_contact_phone, kyc_status, status, activity, x, y, 
               heart_rate, speed, battery, last_updated, checkin_history
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
           `, [
             t.id, t.fullName, encrypt(t.email || ""), passwordHash, t.dateOfBirth || null, t.nationality || "",
-            encrypt(t.passportNo || ""), encrypt(t.visaNo || ""), t.visaExpiry || null, encrypt(t.emergencyContactName || ""),
+            encrypt(t.passportNo || ""), t.passportExpiry || null, encrypt(t.visaNo || ""), t.visaExpiry || null, encrypt(t.emergencyContactName || ""),
             encrypt(t.emergencyContactPhone || ""), t.kycStatus || "Pending", t.status || "Safe", t.activity || "Resting",
             t.x || 220, t.y || 350, t.heartRate || 72, t.speed || 0.0, t.battery || 100, t.lastUpdated || "",
             history
@@ -230,10 +234,10 @@ async function init() {
         for (const inc of initialData.incidents) {
           await client.query(`
             INSERT INTO incidents (
-              id, tourist_id, tourist_name, type, location, created_at, timestamp, status
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+              id, tourist_id, full_name, tourist_name, type, location, created_at, timestamp, status
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           `, [
-            inc.id, inc.touristId, inc.touristName, inc.type, inc.location, new Date(), inc.timestamp, inc.status
+            inc.id, inc.touristId, inc.fullName, inc.touristName, inc.type, inc.location, new Date(), inc.timestamp, inc.status
           ]);
         }
         console.log(`[DB] Seeded ${initialData.incidents.length} incidents.`);
