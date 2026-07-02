@@ -761,7 +761,7 @@ app.post("/api/sos", async (req, res) => {
     
     const safeName = tourist.full_name || tourist.tourist_name || tourist.name || "Unknown";
     const incId = "INC-" + Math.floor(1000 + Math.random() * 9000);
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timestamp = new Date().toISOString();
     const loc = location || (tourist.activity?.includes("Hiking") ? "Wilderness Trail Grid X4" : "Coastal Sector X2");
 
     await pool.query("BEGIN");

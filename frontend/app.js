@@ -666,7 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="sos-incident-card">
           <div class="sos-incident-header">
             <span class="sos-incident-type">🚨 ${inc.type}</span>
-            <span class="sos-incident-time">${inc.timestamp}</span>
+            <span class="sos-incident-time">${inc.timestamp && inc.timestamp.includes('T') ? new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : inc.timestamp}</span>
           </div>
           <div class="sos-incident-body">
             <div class="sos-tourist-info">

@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="sos-incident-card">
           <div class="sos-incident-header">
             <span class="sos-incident-type">🚨 ${inc.type}</span>
-            <span class="sos-incident-time">${inc.timestamp}</span>
+            <span class="sos-incident-time">${inc.timestamp && inc.timestamp.includes('T') ? new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : inc.timestamp}</span>
           </div>
           <div class="sos-incident-body">
             <div class="sos-tourist-info">
@@ -1023,6 +1023,60 @@ document.addEventListener("DOMContentLoaded", () => {
     el.textContent = msg;
     el.style.color = color;
     el.style.display = "block";
+  }
+
+  // --- WEB AUDIO API SIREN ---
+  function handleSirenSoundState() {
+    const hasActiveSos = state.incidents.some(i => i.status === "Active");
+    const muteBtn = document.getElementById("mute-siren-btn");
+    const isMuted = muteBtn ? muteBtn.classList.contains("muted") : false;
+    
+    if (hasActiveSos && !isMuted) {
+      startSirenSfx();
+      const overlay = document.getElementById("siren-active-overlay");
+      if (overlay) overlay.style.display = "block";
+    } else {
+      stopSirenSfx();
+      const overlay = document.getElementById("siren-active-overlay");
+      if (overlay) overlay.style.display = "none";
+    }
+  }
+
+  function startSirenSfx() {
+    if (state.sirenInterval) return;
+    if (!state.audioCtx) {
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    let isHigh = false;
+    state.sirenInterval = setInterval(() => {
+      if (!state.audioCtx) return;
+      if (state.audioCtx.state === 'suspended') {
+        state.audioCtx.resume();
+      }
+      const osc = state.audioCtx.createOscillator();
+      const gain = state.audioCtx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(isHigh ? 800 : 550, state.audioCtx.currentTime);
+      const filter = state.audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(1000, state.audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.08, state.audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.45);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(state.audioCtx.destination);
+      osc.start();
+      osc.stop(state.audioCtx.currentTime + 0.48);
+      isHigh = !isHigh;
+    }, 500);
+  }
+
+  function stopSirenSfx() {
+    if (state.sirenInterval) {
+      clearInterval(state.sirenInterval);
+      state.sirenInterval = null;
+    }
   }
 
   init();
