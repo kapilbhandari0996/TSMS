@@ -8,7 +8,7 @@ const fs = require("fs");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const { runFullVerification } = require("./ocrModule");
-const bcrypt = require("bcryptjs");
+
 const { encrypt, decrypt } = require("./cryptoUtils");
 const { logAudit } = require("./auditLogger");
 const { generateToken, verifyToken, requireRole } = require("./authMiddleware");
@@ -233,7 +233,7 @@ app.post("/api/auth/tourist", async (req, res) => {
       return res.status(401).json({ error: "Tourist ID or Email not found." });
 
     const t = q.rows[0];
-    const isMatch = await bcrypt.compare(password, t.password_hash);
+    const isMatch = password === t.password_hash;
     if (!isMatch) {
       logAudit(t.id, "Tourist", "Failed login - Incorrect password", req.ip);
       return res.status(401).json({ error: "Incorrect password." });
@@ -275,7 +275,7 @@ app.post("/api/auth/admin", async (req, res) => {
     if (q.rowCount === 0) return res.status(401).json({ error: "Invalid admin credentials." });
     
     const adminUser = q.rows[0];
-    const isMatch = await bcrypt.compare(password, adminUser.password_hash);
+    const isMatch = password === adminUser.password_hash;
     
     if (!isMatch) {
       logAudit(adminUser.id, adminUser.role, "Failed admin login", req.ip);
@@ -462,7 +462,7 @@ app.post("/api/kyc/submit", async (req, res) => {
     if (emailDupCheck.rowCount > 0)
       return res.status(409).json({ error: "A tourist with this email address is already registered." });
 
-    const hashedPw = passwordHash ? await bcrypt.hash(passwordHash, 10) : "";
+    const hashedPw = passwordHash || "";
     const generatedId = "TSMS-" + Math.floor(1000 + Math.random() * 9000);
     const x = Math.floor(200 + Math.random() * 200);
     const y = Math.floor(150 + Math.random() * 200);

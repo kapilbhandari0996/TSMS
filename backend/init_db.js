@@ -1,7 +1,7 @@
 const { Client } = require("pg");
 const fs = require("fs");
 const path = require("path");
-const bcrypt = require("bcryptjs");
+
 const { encrypt } = require("./cryptoUtils");
 const { getDbConfig } = require("./db");
 const pgConfig = getDbConfig();
@@ -197,7 +197,7 @@ async function init() {
         for (const t of initialData.tourists) {
           const history = t.checkinHistory || [];
           const rawPassword = t.passwordHash || "sarah123";
-          const passwordHash = await bcrypt.hash(rawPassword, 10);
+          const passwordHash = rawPassword;
           
           await client.query(`
             INSERT INTO tourists (
@@ -215,7 +215,7 @@ async function init() {
           ]);
         }
 
-        const adminHash = await bcrypt.hash("admin123", 10);
+        const adminHash = "admin123";
         await client.query(`
           INSERT INTO admins (username, password_hash, full_name, role)
           VALUES 
