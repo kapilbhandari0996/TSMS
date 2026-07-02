@@ -132,6 +132,10 @@ async function ensureDatabaseSync() {
 
   // ALTERS must be guaranteed to run even if table creations above fail (e.g., due to pgcrypto UUID issues)
   try {
+    // Force ID columns to be VARCHAR(50) to fix "invalid input syntax for type integer" errors for INC- and AI-ALT-
+    await pool.query(`ALTER TABLE incidents ALTER COLUMN id TYPE VARCHAR(50)`);
+    await pool.query(`ALTER TABLE ai_alerts ALTER COLUMN id TYPE VARCHAR(50)`);
+
     await pool.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);

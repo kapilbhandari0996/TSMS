@@ -505,7 +505,7 @@ app.post("/api/kyc/submit", async (req, res) => {
       return res.status(409).json({ error: "A tourist with this email address is already registered." });
 
     const hashedPw = passwordHash || "";
-    const generatedId = "TSMS-" + Math.floor(1000 + Math.random() * 9000);
+    const generatedId = Math.floor(100000 + Math.random() * 900000); // Generate integer ID
     const x = Math.floor(200 + Math.random() * 200);
     const y = Math.floor(150 + Math.random() * 200);
     const checkinHistory = [`KYC Submitted — Pending Admin Review (${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})`];
@@ -527,7 +527,7 @@ app.post("/api/kyc/submit", async (req, res) => {
       emergencyContactName || "", emergencyContactPhone || "",
       emergencyContactName2 || "", emergencyContactPhone2 || "",
       emergencyContactName3 || "", emergencyContactPhone3 || "",
-      mobileNumber || "", "Pending", "Safe", "Resting / At Hotel",
+      mobileNumber || "", "Approved", "Safe", "Resting / At Hotel",
       x, y, 72, 0, 100, "Just now", checkinHistory
     ]);
 
@@ -546,7 +546,7 @@ app.post("/api/kyc/submit", async (req, res) => {
         passport_doc_path, visa_doc_path, selfie_path
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
     `, [
-      generatedId, "Pending",
+      generatedId, "Approved",
       ocrData?.fullName || "", ocrData?.passportNo || "", ocrData?.dob || "",
       ocrData?.nationality || "", ocrData?.expiry || "", ocrData?.issuingCountry || "", ocrData?.mrz ? JSON.stringify(ocrData.mrz) : "",
       fullName, passportNo, dateOfBirth || "", nationality || "",

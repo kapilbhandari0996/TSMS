@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("id-card-nationality").innerText = tourist.nationality;
     document.getElementById("id-card-passport").innerText    = tourist.passportNo;
     document.getElementById("id-card-id").innerText          = tourist.id;
-    document.getElementById("id-card-serial").innerText      = tourist.id.replace("TSMS-", "SN-");
+        document.getElementById("id-card-serial").innerText      = String(tourist.id).replace("TSMS-", "SN-");
 
     // Status Badge Style
     const statusBadge = document.getElementById("id-card-status");
