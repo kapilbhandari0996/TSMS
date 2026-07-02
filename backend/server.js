@@ -14,6 +14,7 @@ const { logAudit } = require("./auditLogger");
 const { generateToken, verifyToken, requireRole } = require("./authMiddleware");
 const { startAnomalyEngine, setBroadcastCallback } = require("./anomalyEngine");
 const { pool } = require("./db");
+const { ensureDatabaseSync } = require("./schema_sync");
 
 // ===== TEMP DATABASE DEBUG =====
 (async () => {
@@ -165,7 +166,18 @@ function broadcast(payload) {
   const msg = JSON.stringify(payload);
   clients.forEach(c => { if (c.readyState === WebSocket.OPEN) c.send(msg); });
 }
-setBroadcastCallback(broadcast);
+
+setBroadcastCallback(async (payload) => {
+  broadcast(payload);
+  if (payload.type === "ai_alert_new") {
+    try {
+      const state = await getSystemState();
+      broadcast({ type: "state_update", state });
+    } catch (err) {
+      console.error("[Broadcast] Failed to broadcast state_update for ai_alert:", err);
+    }
+  }
+});
 
 // ============================================================
 // --- REST API ENDPOINTS ---
@@ -608,8 +620,11 @@ app.get("/api/admin/kyc", async (req, res) => {
 
     res.json(submissions);
   } catch (err) {
-    console.error("[Admin KYC] Error fetching submissions:", err);
-    res.status(500).json({ error: "Database query failure." });
+      console.error("[API] Error fetching KYC submissions:");
+      console.error(err);
+      if (err.stack) console.error(err.stack);
+      if (err.query) console.error(err.query);
+      res.json([]); // Return empty array gracefully if table is missing or query fails
   }
 });
 
@@ -844,14 +859,19 @@ function startServerAISimulation() {
   }, 12000);
 }
 
-// Start HTTP Server
-server.listen(PORT, () => {
-  console.log("==================================================");
-  console.log("  TSMS FULL-STACK BACKEND STARTED SUCCESSFULLY   ");
-  console.log(`  REST API Port: http://localhost:${PORT}        `);
-  console.log(`  WebSocket URL: ws://localhost:${PORT}          `);
-  console.log("==================================================");
-  startServerAISimulation();
-  startAnomalyEngine(10000); // Check for AI Alerts every 10 seconds (for testing)
+// Start Server
+ensureDatabaseSync().then(() => {
+  server.listen(PORT, () => {
+    console.log("=".repeat(50));
+    console.log("  TSMS FULL-STACK BACKEND STARTED SUCCESSFULLY   ");
+    console.log(`  REST API Port: http://localhost:${PORT}        `);
+    console.log(`  WebSocket URL: ws://localhost:${PORT}          `);
+    console.log("=".repeat(50));
+    
+    // Start background processes
+    startServerAISimulation();
+    startAnomalyEngine(10000); // Check every 10s for demo purposes
+  });
+}).catch(err => {
+  console.error("Failed to start server due to DB sync error:", err);
 });
-// trigger restart 1

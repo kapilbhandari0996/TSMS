@@ -96,7 +96,10 @@ async function checkAnomalies() {
       }
     }
   } catch (err) {
-    console.error("[AI ENGINE SAFE ERROR]", err.message || err);
+    console.error("[AI ENGINE SAFE ERROR]");
+    console.error(err);
+    if (err.stack) console.error(err.stack);
+    if (err.query) console.error(err.query);
   }
 }
 
@@ -104,7 +107,10 @@ function startAnomalyEngine(intervalMs = 60000) {
   console.log(`[AI ENGINE] Started anomaly monitoring (Interval: ${intervalMs}ms)`);
   setInterval(() => {
     checkAnomalies().catch((err) => {
-      console.error("[AI ENGINE SAFE ERROR]", err.message || err);
+      console.error("[AI ENGINE SAFE ERROR]");
+      console.error(err);
+      if (err.stack) console.error(err.stack);
+      if (err.query) console.error(err.query);
     });
   }, intervalMs);
 }

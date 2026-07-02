@@ -19,7 +19,7 @@ async function migrate() {
     const statements = [
       `CREATE TABLE IF NOT EXISTS tourists (
         id VARCHAR(50) PRIMARY KEY,
-        tourist_name VARCHAR(100),
+        full_name VARCHAR(100),
         email TEXT,
         password_hash VARCHAR(255) NOT NULL DEFAULT '',
         date_of_birth DATE,
@@ -48,7 +48,7 @@ async function migrate() {
         last_active_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_moved_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         checkin_history TEXT[] DEFAULT '{}' )`,
-      `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`,
+      `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS email TEXT`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) DEFAULT ''`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS date_of_birth DATE`,

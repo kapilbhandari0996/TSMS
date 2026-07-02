@@ -75,6 +75,19 @@ function buildDbConfig() {
 const dbConfig = buildDbConfig();
 const pool = new Pool(dbConfig);
 
+const originalQuery = pool.query.bind(pool);
+pool.query = async (...args) => {
+  try {
+    return await originalQuery(...args);
+  } catch (err) {
+    console.error("[DB TEMP LOG] Query failed:");
+    console.error("SQL:", args[0]);
+    if (args[1]) console.error("PARAMS:", args[1]);
+    err.query = args[0];
+    throw err;
+  }
+};
+
 pool.on("connect", () => {
   console.log("[DB] Connected to PostgreSQL database.");
 });
