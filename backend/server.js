@@ -758,19 +758,34 @@ app.post("/api/sos", async (req, res) => {
     const q = await pool.query("SELECT * FROM tourists WHERE id = $1", [touristId]);
     if (q.rowCount === 0) return res.status(404).json({ error: "Tourist not found." });
     const tourist = q.rows[0];
-    await pool.query("UPDATE tourists SET status = 'Distress', activity = $1, heart_rate = 135, speed = 0, last_updated = 'Just now' WHERE id = $2",
-      [`In Distress (${incidentType})`, touristId]);
+    
+    const safeName = tourist.full_name || tourist.tourist_name || tourist.name || "Unknown";
     const incId = "INC-" + Math.floor(1000 + Math.random() * 9000);
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const loc = location || (tourist.activity?.includes("Hiking") ? "Wilderness Trail Grid X4" : "Coastal Sector X2");
-    await pool.query("INSERT INTO incidents (id, tourist_id, full_name, type, location, created_at, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
-      [incId, touristId, tourist.full_name, incidentType, loc, new Date(), timestamp]);
-    console.log(`[API] SOS TRIGGERED: ${tourist.full_name} (${touristId}) - ${incidentType}`);
+
+    await pool.query("BEGIN");
+    await pool.query("UPDATE tourists SET status = 'Distress', activity = $1, heart_rate = 135, speed = 0, last_updated = 'Just now' WHERE id = $2",
+      [`In Distress (${incidentType})`, touristId]);
+      
+    // Include tourist_name to fix schema mismatches on older DB versions and omit created_at
+    await pool.query("INSERT INTO incidents (id, tourist_id, full_name, tourist_name, type, location, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
+      [incId, touristId, safeName, safeName, incidentType, loc, timestamp]);
+    await pool.query("COMMIT");
+
+    console.log(`[API] SOS TRIGGERED: ${safeName} (${touristId}) - ${incidentType}`);
     const state = await getSystemState();
     const newSos = state.incidents.find(i => i.id === incId);
-    broadcast({ type: "sos_triggered", incident: newSos, state });
-    res.status(201).json(newSos);
+    
+    if (newSos) {
+      broadcast({ type: "sos_triggered", incident: newSos, state });
+      res.status(201).json(newSos);
+    } else {
+      res.status(500).json({ error: "SOS inserted but not found in state." });
+    }
   } catch (err) {
+    await pool.query("ROLLBACK");
+    console.error("[API] SOS DB Error:", err.message || err);
     res.status(500).json({ error: "Database query failure." });
   }
 });

@@ -380,15 +380,18 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
-        .then(res => res.json())
-        .then(newSos => {
+        .then(async res => {
+          const newSos = await res.json();
+          if (!res.ok || newSos.error) {
+            throw new Error(newSos.error || "Backend query failure");
+          }
           state.activeSos = newSos;
           closeSosConfirmModal();
           showToast("Danger", "SOS alert transmitted! Rescue units are being dispatched.");
         })
         .catch(err => {
           console.error("SOS transmission failure:", err);
-          showToast("Danger", "SOS network error. Retrying offline bypass...");
+          showToast("Danger", "SOS network error: " + (err.message || "Retrying offline bypass..."));
         });
     };
 
