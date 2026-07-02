@@ -22,7 +22,6 @@ async function init() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS tourists (
         id VARCHAR(50) PRIMARY KEY,
-        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         email TEXT,
         password_hash VARCHAR(255) NOT NULL DEFAULT '',
@@ -54,7 +53,6 @@ async function init() {
         checkin_history TEXT[] DEFAULT '{}'
       )
     `);
-    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS email TEXT`);
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) DEFAULT ''`);
@@ -84,6 +82,7 @@ async function init() {
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS last_active_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS last_moved_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS checkin_history TEXT[] DEFAULT '{}'`);
+    await client.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`);
     console.log("[DB] Table 'tourists' verified/created.");
 
     await client.query(`
@@ -93,6 +92,7 @@ async function init() {
         tourist_name VARCHAR(100),
         type VARCHAR(100),
         location VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         timestamp VARCHAR(50),
         status VARCHAR(50) DEFAULT 'Active'
       )
@@ -101,6 +101,7 @@ async function init() {
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS timestamp VARCHAR(50)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`);
     console.log("[DB] Table 'incidents' verified/created.");
@@ -200,13 +201,13 @@ async function init() {
           
           await client.query(`
             INSERT INTO tourists (
-              id, full_name, tourist_name, email, password_hash, date_of_birth, nationality, 
+              id, tourist_name, email, password_hash, date_of_birth, nationality,
               passport_no, visa_no, visa_expiry, emergency_contact_name, 
               emergency_contact_phone, kyc_status, status, activity, x, y, 
               heart_rate, speed, battery, last_updated, checkin_history
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
           `, [
-            t.id, t.fullName, t.fullName, encrypt(t.email || ""), passwordHash, t.dateOfBirth || null, t.nationality || "",
+            t.id, t.fullName, encrypt(t.email || ""), passwordHash, t.dateOfBirth || null, t.nationality || "",
             encrypt(t.passportNo || ""), encrypt(t.visaNo || ""), t.visaExpiry || null, encrypt(t.emergencyContactName || ""),
             encrypt(t.emergencyContactPhone || ""), t.kycStatus || "Pending", t.status || "Safe", t.activity || "Resting",
             t.x || 220, t.y || 350, t.heartRate || 72, t.speed || 0.0, t.battery || 100, t.lastUpdated || "",
@@ -229,10 +230,10 @@ async function init() {
         for (const inc of initialData.incidents) {
           await client.query(`
             INSERT INTO incidents (
-              id, tourist_id, tourist_name, type, location, timestamp, status
+              id, tourist_id, tourist_name, type, location, created_at, timestamp, status
             ) VALUES ($1, $2, $3, $4, $5, $6, $7)
           `, [
-            inc.id, inc.touristId, inc.touristName, inc.type, inc.location, inc.timestamp, inc.status
+            inc.id, inc.touristId, inc.touristName, inc.type, inc.location, new Date(), inc.timestamp, inc.status
           ]);
         }
         console.log(`[DB] Seeded ${initialData.incidents.length} incidents.`);

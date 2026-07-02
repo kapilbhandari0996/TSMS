@@ -18,6 +18,17 @@ const { pool } = require("./db");
 // ===== TEMP DATABASE DEBUG =====
 (async () => {
   try {
+    const schemaQueries = [
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'tourists' ORDER BY ordinal_position",
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'incidents' ORDER BY ordinal_position"
+    ];
+
+    for (const sql of schemaQueries) {
+      console.log(`[SCHEMA CHECK] ${sql}`);
+      const res = await pool.query(sql);
+      console.log(`[SCHEMA CHECK] ${JSON.stringify(res.rows.map((row) => row.column_name))}`);
+    }
+
     const dbInfo = await pool.query(`
       SELECT current_database(), current_schema();
     `);
@@ -75,7 +86,7 @@ async function getSystemState() {
 
   const tourists = touristsRes.rows.map(t => ({
     id: t.id,
-    fullName: t.full_name,
+    fullName: t.tourist_name,
     email: decrypt(t.email),
     dateOfBirth: t.date_of_birth ? t.date_of_birth.toISOString().split("T")[0] : "",
     nationality: t.nationality,
@@ -177,10 +188,47 @@ app.post("/api/auth/tourist", async (req, res) => {
     return res.status(400).json({ error: "Tourist ID/Email and password required." });
 
   try {
-    const q = await pool.query(
-      "SELECT * FROM tourists WHERE id = $1 OR LOWER(email) = LOWER($2) OR email = $3",
-      [touristId.trim(), touristId.trim(), encrypt(touristId.trim())]
-    );
+    const input = touristId.trim();
+
+    const colCheck = await pool.query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'tourists' AND column_name IN ('id', 'tourist_id')
+    `);
+    
+    let idType = 'character varying';
+    let hasTouristIdCol = false;
+    for (let row of colCheck.rows) {
+      if (row.column_name === 'id') idType = row.data_type;
+      if (row.column_name === 'tourist_id') hasTouristIdCol = true;
+    }
+    
+    const isIdNumeric = (idType === 'integer' || idType === 'bigint' || idType === 'numeric');
+    
+    let conditions = [];
+    let params = [];
+    
+    params.push(input);
+    params.push(encrypt(input));
+    conditions.push(`LOWER(email) = LOWER($1)`);
+    conditions.push(`email = $2`);
+
+    if (/^\d+$/.test(input)) {
+      params.push(parseInt(input, 10));
+      conditions.push(`id = $${params.length}`);
+    } else {
+      if (input.startsWith("TSMS-") && hasTouristIdCol) {
+        params.push(input);
+        conditions.push(`tourist_id = $${params.length}`);
+      }
+      if (!isIdNumeric) {
+        params.push(input);
+        conditions.push(`id = $${params.length}`);
+      }
+    }
+
+    const queryStr = `SELECT * FROM tourists WHERE ${conditions.join(" OR ")}`;
+    const q = await pool.query(queryStr, params);
     if (q.rowCount === 0)
       return res.status(401).json({ error: "Tourist ID or Email not found." });
 
@@ -197,7 +245,7 @@ app.post("/api/auth/tourist", async (req, res) => {
 
     // Return KYC status so frontend can handle pending/rejected states
     const safeTourist = {
-      id: t.id, fullName: t.full_name, email: decrypt(t.email),
+      id: t.id, fullName: t.tourist_name, email: decrypt(t.email),
       dateOfBirth: t.date_of_birth ? t.date_of_birth.toISOString().split("T")[0] : "",
       nationality: t.nationality, passportNo: decrypt(t.passport_no), visaNo: decrypt(t.visa_no),
       visaExpiry: t.visa_expiry ? t.visa_expiry.toISOString().split("T")[0] : "",
@@ -423,7 +471,7 @@ app.post("/api/kyc/submit", async (req, res) => {
     // Insert tourist with Pending status
     await pool.query(`
       INSERT INTO tourists (
-        id, full_name, email, password_hash, date_of_birth, nationality,
+        id, tourist_name, email, password_hash, date_of_birth, nationality,
         passport_no, passport_expiry, visa_no, visa_expiry,
         emergency_contact_name, emergency_contact_phone,
         emergency_contact_name_2, emergency_contact_phone_2,
@@ -490,7 +538,7 @@ app.post("/api/kyc/submit", async (req, res) => {
 app.get("/api/admin/kyc", async (req, res) => {
   try {
     const q = await pool.query(`
-      SELECT ks.*, t.full_name, t.email, t.mobile_number, t.passport_no, t.nationality, t.kyc_rejection_reason
+      SELECT ks.*, t.tourist_name, t.email, t.mobile_number, t.passport_no, t.nationality, t.kyc_rejection_reason
       FROM kyc_submissions ks
       JOIN tourists t ON ks.tourist_id = t.id
       ORDER BY ks.submitted_at DESC
@@ -499,7 +547,7 @@ app.get("/api/admin/kyc", async (req, res) => {
     const submissions = q.rows.map(r => ({
       id: r.id,
       touristId: r.tourist_id,
-      fullName: r.full_name,
+      fullName: r.tourist_name,
       email: r.email,
       mobileNumber: r.mobile_number,
       passportNo: r.passport_no,
@@ -670,9 +718,9 @@ app.post("/api/sos", async (req, res) => {
     const incId = "INC-" + Math.floor(1000 + Math.random() * 9000);
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const loc = location || (tourist.activity?.includes("Hiking") ? "Wilderness Trail Grid X4" : "Coastal Sector X2");
-    await pool.query("INSERT INTO incidents (id, tourist_id, tourist_name, type, location, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,'Active')",
-      [incId, touristId, tourist.full_name, incidentType, loc, timestamp]);
-    console.log(`[API] SOS TRIGGERED: ${tourist.full_name} (${touristId}) - ${incidentType}`);
+    await pool.query("INSERT INTO incidents (id, tourist_id, tourist_name, type, location, created_at, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
+      [incId, touristId, tourist.tourist_name, incidentType, loc, new Date(), timestamp]);
+    console.log(`[API] SOS TRIGGERED: ${tourist.tourist_name} (${touristId}) - ${incidentType}`);
     const state = await getSystemState();
     const newSos = state.incidents.find(i => i.id === incId);
     broadcast({ type: "sos_triggered", incident: newSos, state });
@@ -686,11 +734,11 @@ app.post("/api/sos", async (req, res) => {
 app.post("/api/sos/cancel", async (req, res) => {
   const { touristId } = req.body;
   try {
-    const q = await pool.query("SELECT full_name FROM tourists WHERE id = $1", [touristId]);
+    const q = await pool.query("SELECT tourist_name FROM tourists WHERE id = $1", [touristId]);
     if (q.rowCount === 0) return res.status(404).json({ error: "Tourist not found." });
     await pool.query("UPDATE tourists SET status = 'Safe', activity = 'Resting / At Hotel', heart_rate = 72, speed = 0, last_updated = 'Just now' WHERE id = $1", [touristId]);
     await pool.query("UPDATE incidents SET status = 'Resolved' WHERE tourist_id = $1 AND status = 'Active'", [touristId]);
-    console.log(`[API] SOS Stand-down for: ${q.rows[0].full_name} (${touristId})`);
+    console.log(`[API] SOS Stand-down for: ${q.rows[0].tourist_name} (${touristId})`);
     const state = await getSystemState();
     broadcast({ type: "sos_resolved", touristId, state });
     res.json({ status: "Stand-down complete", tourist: state.tourists.find(t => t.id === touristId) });

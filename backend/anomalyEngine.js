@@ -9,7 +9,7 @@ function setBroadcastCallback(cb) {
 
 async function triggerAlert(tourist, riskLevel, reason) {
   try {
-    const touristName = tourist.tourist_name || tourist.full_name || "Unknown Tourist";
+    const touristName = tourist.tourist_name || "Unknown Tourist";
     const alertId = "AI-ALT-" + Math.floor(1000 + Math.random() * 9000);
 
     const existingRes = await pool.query(
@@ -47,14 +47,14 @@ async function triggerAlert(tourist, riskLevel, reason) {
 async function checkAnomalies() {
   try {
     const inactiveRes = await pool.query(`
-      SELECT id, COALESCE(tourist_name, full_name) AS tourist_name, status
+      SELECT id, tourist_name, status
       FROM tourists
       WHERE last_active_timestamp < NOW() - INTERVAL '6 hours'
       AND status != 'Distress'
     `);
 
     const stuckRes = await pool.query(`
-      SELECT id, COALESCE(tourist_name, full_name) AS tourist_name, status
+      SELECT id, tourist_name, status
       FROM tourists
       WHERE last_moved_timestamp < NOW() - INTERVAL '8 hours'
       AND status != 'Distress'
@@ -64,7 +64,7 @@ async function checkAnomalies() {
       SELECT tourist_id, COUNT(*) as sos_count
       FROM incidents
       WHERE type = 'SOS'
-        AND timestamp > NOW() - INTERVAL '10 minutes'
+        AND created_at >= NOW() - INTERVAL '10 minutes'
       GROUP BY tourist_id
       HAVING COUNT(*) > 3
     `);

@@ -19,7 +19,6 @@ async function migrate() {
     const statements = [
       `CREATE TABLE IF NOT EXISTS tourists (
         id VARCHAR(50) PRIMARY KEY,
-        full_name VARCHAR(100),
         tourist_name VARCHAR(100),
         email TEXT,
         password_hash VARCHAR(255) NOT NULL DEFAULT '',
@@ -49,7 +48,6 @@ async function migrate() {
         last_active_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_moved_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         checkin_history TEXT[] DEFAULT '{}' )`,
-      `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS email TEXT`,
       `ALTER TABLE tourists ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) DEFAULT ''`,
@@ -85,12 +83,14 @@ async function migrate() {
         tourist_name VARCHAR(100),
         type VARCHAR(100),
         location VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         timestamp VARCHAR(50),
         status VARCHAR(50) DEFAULT 'Active' )`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_id VARCHAR(50)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`,
+      `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS timestamp VARCHAR(50)`,
       `ALTER TABLE incidents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`,
       `CREATE TABLE IF NOT EXISTS ai_alerts (
