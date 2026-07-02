@@ -134,6 +134,12 @@ async function ensureDatabaseSync() {
   try {
     await pool.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS tourist_name VARCHAR(100)`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS type VARCHAR(100)`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS location VARCHAR(100)`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS timestamp VARCHAR(50)`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`);
+    await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await pool.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     
     await pool.query(`ALTER TABLE tourists DROP COLUMN IF EXISTS tourist_name`);
