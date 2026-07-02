@@ -160,14 +160,14 @@
             <!-- Core One-Click Trigger Button -->
             <button id="sos-trigger-btn" class="sos-trigger-btn" aria-label="Trigger SOS Alert">
               <span class="sos-trigger-text" data-translate="sosButtonText">SOS HELP</span>
-              <span class="sos-trigger-subtext" style="font-size: 8px; opacity: 0.7;">Click to Trigger</span>
+              <span class="sos-trigger-subtext" style="font-size: 8px; opacity: 0.7;" data-translate="triggerSosSub">Click to Trigger</span>
             </button>
           </div>
 
           <!-- Active Alerts Transmitting panel -->
           <div id="sos-active-alert" class="sos-status-alert">
             <span style="font-size: 18px; animation: pulse-red 1s infinite; border-radius: 50%; width: 10px; height: 10px; background-color: white; display: inline-block;"></span>
-            <span>Distress Telemetry Transmitting...</span>
+            <span data-translate="sosTransmitting">Distress Telemetry Transmitting...</span>
           </div>
 
           <button id="sos-cancel-btn" class="cancel-sos-btn" data-sec="5">Cancel SOS (Countdown: 5s)</button>
@@ -185,7 +185,7 @@
                 <option value="swimming" data-translate="actSwimming">Water Sports / Swimming</option>
                 <option value="transit" data-translate="actTransit">In Transit / Driving</option>
               </select>
-              <textarea id="tourist-activity-note" placeholder="Write an emergency note or custom status update (Optional)..." style="padding: 10px 12px; font-size: 13px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; border-radius: 4px; resize: vertical; min-height: 60px;" aria-label="Custom Activity Note"></textarea>
+              <textarea id="tourist-activity-note" placeholder="Write an emergency note or custom status update (Optional)..." data-translate="notePlaceholder" style="padding: 10px 12px; font-size: 13px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; border-radius: 4px; resize: vertical; min-height: 60px;" aria-label="Custom Activity Note"></textarea>
               <button id="update-activity-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; white-space: nowrap; align-self: flex-start;" data-translate="logActivityBtn">Update Status</button>
             </div>
           </div>

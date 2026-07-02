@@ -116,7 +116,7 @@
               <h2 class="card-title" data-translate="viewMap" style="margin-bottom: 2px;">Live Safety Map</h2>
               <span class="card-subtitle" data-translate="mapLegend" style="margin: 0; font-size: 11px;">Interactive Geofence & Tracker Map</span>
             </div>
-            <button id="mute-siren-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 11px;">🔊 Siren Sound</button>
+            <button id="mute-siren-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 11px;" data-translate="sirenBtn">🔊 Siren Sound</button>
           </div>
 
           <div class="map-container">
@@ -149,11 +149,11 @@
               <path d="M180,120 L220,350 L550,410" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="5,5" />
 
               <!-- Landmarks / Region text labels -->
-              <text x="210" y="380" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Seaside Resort</text>
-              <text x="140" y="100" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Central City Sector</text>
-              <text x="440" y="270" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Mountain Ridge</text>
-              <text x="450" y="80" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">High-Risk Canyon</text>
-              <text x="560" y="440" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6">Deep Water Marina</text>
+              <text x="210" y="380" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6" data-translate="mapLabelSeaside">Seaside Resort</text>
+              <text x="140" y="100" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6" data-translate="mapLabelCentral">Central City Sector</text>
+              <text x="440" y="270" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6" data-translate="mapLabelMountain">Mountain Ridge</text>
+              <text x="450" y="80" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6" data-translate="mapLabelCanyon">High-Risk Canyon</text>
+              <text x="560" y="440" fill="var(--text-secondary)" font-size="10px" font-weight="600" opacity="0.6" data-translate="mapLabelMarina">Deep Water Marina</text>
 
               <!-- Safe Zone Boundary Ring -->
               <circle cx="220" cy="350" r="100" fill="none" stroke="var(--safe)" stroke-width="1" stroke-opacity="0.2" />
@@ -168,7 +168,7 @@
         <!-- Emergency dispatch logs queue Right -->
         <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column;">
           <h2 class="card-title" data-translate="liveSosFeed">Live Emergency Dispatch</h2>
-          <p class="card-subtitle" style="margin-bottom: 20px;">Direct coordination channel with active SOS callers.</p>
+          <p class="card-subtitle" style="margin-bottom: 20px;" data-translate="dispatchSub">Direct coordination channel with active SOS callers.</p>
           
           <div id="sos-alert-feed" class="sos-alert-feed" style="flex: 1; overflow-y: auto; max-height: 440px; padding-right: 5px;">
             <!-- SOS Dispatch Incident Cards injected here -->
@@ -182,27 +182,27 @@
         <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; grid-column: span 2;">
           <div>
             <h2 class="card-title" data-translate="exportReport">Export Reports & Data</h2>
-            <p class="card-subtitle" style="margin-bottom: 15px;">Review safety index stats and download regulatory operational logs.</p>
+            <p class="card-subtitle" style="margin-bottom: 15px;" data-translate="exportSub">Review safety index stats and download regulatory operational logs.</p>
           </div>
 
           <!-- Mini charts grid inside Reports card -->
           <div class="reports-layout" style="display: flex; gap: 20px; margin-bottom: 20px;">
             <!-- Incidents type bar counts -->
             <div class="chart-wrapper" style="flex: 1; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-              <span class="chart-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 10px;">Incidents By Type</span>
+              <span class="chart-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 10px;" data-translate="chartIncidents">Incidents By Type</span>
               <div id="incident-chart-container" class="svg-chart-container"></div>
             </div>
 
             <!-- Tourist safety status donut -->
             <div class="chart-wrapper" style="flex: 1; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-              <span class="chart-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 10px;">Safety Status Distribution</span>
+              <span class="chart-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 10px;" data-translate="chartSafety">Safety Status Distribution</span>
               <div id="safety-chart-container" class="svg-chart-container"></div>
             </div>
           </div>
 
           <div class="reports-actions-row" style="display: flex; gap: 10px;">
-            <button id="report-download-csv" class="btn-primary" style="flex: 1; padding: 12px; font-size: 12px;">Download CSV Registry</button>
-            <button id="report-download-txt" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px;">Download Audit Text Log</button>
+            <button id="report-download-csv" class="btn-primary" style="flex: 1; padding: 12px; font-size: 12px;" data-translate="btnDownloadCsv">Download CSV Registry</button>
+            <button id="report-download-txt" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px;" data-translate="btnDownloadTxt">Download Audit Text Log</button>
             <button id="inspect-vault-btn-admin" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px; border-color: var(--safe); color: var(--safe);" data-translate="vaultInspectBtn">Inspect Storage Vault</button>
           </div>
         </div>
@@ -214,21 +214,21 @@
       <div class="glass-card" style="margin-top: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
           <div>
-            <h2 class="card-title">🪪 KYC Identity Verification Queue</h2>
-            <p class="card-subtitle" style="margin: 0;">Review, approve or reject tourist identity submissions.</p>
+            <h2 class="card-title" data-translate="kycTitle">🪪 KYC Identity Verification Queue</h2>
+            <p class="card-subtitle" style="margin: 0;" data-translate="kycSubtitle">Review, approve or reject tourist identity submissions.</p>
           </div>
-          <button id="kyc-refresh-btn" class="btn-secondary" style="font-size: 12px; padding: 7px 14px;">🔄 Refresh</button>
+          <button id="kyc-refresh-btn" class="btn-secondary" style="font-size: 12px; padding: 7px 14px;" data-translate="kycBtnRefresh">🔄 Refresh</button>
         </div>
 
         <!-- Filter bar -->
         <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
-          <input type="text" id="kyc-search-input" placeholder="🔍 Search name or passport..." class="search-input" style="flex: 1; min-width: 200px; font-size: 12px; padding: 8px 14px;">
+          <input type="text" id="kyc-search-input" placeholder="🔍 Search name or passport..." data-translate="kycSearchPlace" class="search-input" style="flex: 1; min-width: 200px; font-size: 12px; padding: 8px 14px;">
           <div style="display: flex; gap: 6px;">
-            <button class="kyc-filter-btn active" data-filter="All" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--accent); color: #fff; cursor: pointer; font-weight: 700;">All</button>
-            <button class="kyc-filter-btn" data-filter="Pending" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--warning); color: var(--warning); background: transparent; cursor: pointer; font-weight: 700;">Pending</button>
-            <button class="kyc-filter-btn" data-filter="Verified" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--safe); color: var(--safe); background: transparent; cursor: pointer; font-weight: 700;">Verified</button>
-            <button class="kyc-filter-btn" data-filter="Rejected" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--danger); color: var(--danger); background: transparent; cursor: pointer; font-weight: 700;">Rejected</button>
-            <button class="kyc-filter-btn" data-filter="Manual Review" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--accent); color: var(--accent); background: transparent; cursor: pointer; font-weight: 700;">Manual Review</button>
+            <button class="kyc-filter-btn active" data-filter="All" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--accent); color: #fff; cursor: pointer; font-weight: 700;" data-translate="kycFilterAll">All</button>
+            <button class="kyc-filter-btn" data-filter="Pending" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--warning); color: var(--warning); background: transparent; cursor: pointer; font-weight: 700;" data-translate="kycFilterPending">Pending</button>
+            <button class="kyc-filter-btn" data-filter="Verified" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--safe); color: var(--safe); background: transparent; cursor: pointer; font-weight: 700;" data-translate="kycFilterVerified">Verified</button>
+            <button class="kyc-filter-btn" data-filter="Rejected" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--danger); color: var(--danger); background: transparent; cursor: pointer; font-weight: 700;" data-translate="kycFilterRejected">Rejected</button>
+            <button class="kyc-filter-btn" data-filter="Manual Review" style="font-size: 11px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--accent); color: var(--accent); background: transparent; cursor: pointer; font-weight: 700;" data-translate="kycFilterManual">Manual Review</button>
           </div>
         </div>
 
@@ -237,17 +237,17 @@
           <table class="registry-table">
             <thead>
               <tr>
-                <th>Tourist ID</th>
-                <th>Full Name</th>
-                <th>Passport No</th>
-                <th>Submitted At</th>
-                <th>OCR Status</th>
-                <th>KYC Status</th>
-                <th>Actions</th>
+                <th data-translate="kycThId">Tourist ID</th>
+                <th data-translate="kycThName">Full Name</th>
+                <th data-translate="kycThPassport">Passport No</th>
+                <th data-translate="kycThSubmitted">Submitted At</th>
+                <th data-translate="kycThOcr">OCR Status</th>
+                <th data-translate="kycThKyc">KYC Status</th>
+                <th data-translate="kycThActions">Actions</th>
               </tr>
             </thead>
             <tbody id="kyc-review-table-body">
-              <tr><td colspan="7" style="text-align:center; color: var(--text-secondary); padding: 30px;">Loading KYC submissions...</td></tr>
+              <tr><td colspan="7" style="text-align:center; color: var(--text-secondary); padding: 30px;" data-translate="kycLoading">Loading KYC submissions...</td></tr>
             </tbody>
           </table>
         </div>

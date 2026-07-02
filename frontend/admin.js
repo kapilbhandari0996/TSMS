@@ -841,12 +841,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
+
     tbody.innerHTML = filtered.map(s => {
       const statusColors = { Pending: "var(--warning)", Verified: "var(--safe)", Rejected: "var(--danger)", "Manual Review": "var(--accent)" };
       const color = statusColors[s.status] || "var(--text-secondary)";
-      const ocrIcon = s.validationPassed ? "<span style='color:var(--safe);font-weight:700;'>✅ Passed</span>"
+      
+      let mappedStatus = s.status;
+      if (s.status === "Pending") mappedStatus = dict.kycFilterPending || s.status;
+      else if (s.status === "Verified") mappedStatus = dict.kycFilterVerified || s.status;
+      else if (s.status === "Rejected") mappedStatus = dict.kycFilterRejected || s.status;
+      else if (s.status === "Manual Review") mappedStatus = dict.kycFilterManual || s.status;
+      
+      const ocrIcon = s.validationPassed ? "<span style='color:var(--safe);font-weight:700;'>✅ " + (dict.kycFilterVerified || "Passed") + "</span>"
         : s.validationErrors && s.validationErrors.length > 0 ? `<span style='color:var(--danger);font-weight:700;'>❌ ${s.validationErrors.length} mismatch(es)</span>`
-        : "<span style='color:var(--text-secondary);'>⚠️ No OCR data</span>";
+        : "<span style='color:var(--text-secondary);'>⚠️ " + (dict.kycDetailNoOcr || "No OCR data") + "</span>";
       const date = s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "—";
       return `
         <tr style="cursor:pointer;" onclick="window._openKycDetail && window._openKycDetail('${s.id}')">
@@ -855,8 +864,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <td style="font-family:monospace;">${s.passportNo || "—"}</td>
           <td style="font-size:11px;">${date}</td>
           <td>${ocrIcon}</td>
-          <td><span style="font-size:11px;font-weight:800;color:${color};">${s.status}</span></td>
-          <td><button class="btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="event.stopPropagation(); window._openKycDetail && window._openKycDetail('${s.id}')">View →</button></td>
+          <td><span style="font-size:11px;font-weight:800;color:${color};">${mappedStatus}</span></td>
+          <td><button class="btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="event.stopPropagation(); window._openKycDetail && window._openKycDetail('${s.id}')">${dict.kycBtnView || "View →"}</button></td>
         </tr>
       `;
     }).join("");
@@ -874,15 +883,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("kyc-detail-tourist-name").textContent = sub.fullName || "Unknown";
     document.getElementById("kyc-detail-tourist-id").textContent = sub.touristId || "";
 
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
+
     // OCR comparison fields
     const ocrContainer = document.getElementById("kyc-detail-ocr-fields");
     const fields = [
-      { label: "Full Name", entered: sub.enteredData?.fullName, ocr: sub.ocrData?.fullName },
-      { label: "Passport No", entered: sub.enteredData?.passportNo, ocr: sub.ocrData?.passportNo },
-      { label: "Date of Birth", entered: sub.enteredData?.dob, ocr: sub.ocrData?.dob },
-      { label: "Nationality", entered: sub.enteredData?.nationality, ocr: sub.ocrData?.nationality },
-      { label: "Expiry Date", entered: "—", ocr: sub.ocrData?.expiry },
-      { label: "Issuing Country", entered: "—", ocr: sub.ocrData?.issuingCountry }
+      { label: dict.kycDetailNameLbl || "Full Name", entered: sub.enteredData?.fullName, ocr: sub.ocrData?.fullName },
+      { label: dict.kycDetailPassLbl || "Passport No", entered: sub.enteredData?.passportNo, ocr: sub.ocrData?.passportNo },
+      { label: dict.kycDetailDobLbl || "Date of Birth", entered: sub.enteredData?.dob, ocr: sub.ocrData?.dob },
+      { label: dict.kycDetailNatLbl || "Nationality", entered: sub.enteredData?.nationality, ocr: sub.ocrData?.nationality },
+      { label: dict.kycDetailExpLbl || "Expiry Date", entered: "—", ocr: sub.ocrData?.expiry },
+      { label: dict.kycDetailIssLbl || "Issuing Country", entered: "—", ocr: sub.ocrData?.issuingCountry }
     ];
     ocrContainer.innerHTML = fields.filter(f => f.ocr).map(f => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);">
@@ -892,7 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div style="font-size:10px;color:var(--accent);">OCR: <strong>${f.ocr || "—"}</strong></div>
         </div>
       </div>
-    `).join("") || "<div style='color:var(--text-secondary);font-size:12px;'>No OCR data available.</div>";
+    `).join("") || `<div style='color:var(--text-secondary);font-size:12px;'>${dict.kycDetailNoOcr || "No OCR data available."}</div>`;
 
     // MRZ
     const mrzEl = document.getElementById("kyc-detail-mrz");
