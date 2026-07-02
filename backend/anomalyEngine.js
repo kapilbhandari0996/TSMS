@@ -10,7 +10,7 @@ function setBroadcastCallback(cb) {
 async function triggerAlert(tourist, riskLevel, reason) {
   try {
     const touristName = tourist.full_name || "Unknown Tourist";
-    const alertId = "AI-ALT-" + Math.floor(1000 + Math.random() * 9000);
+    const alertId = Math.floor(100000 + Math.random() * 900000); // Generate integer ID
 
     const existingRes = await pool.query(
       "SELECT id FROM ai_alerts WHERE tourist_id = $1 AND reason = $2 AND status = 'Active'",
