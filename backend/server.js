@@ -786,7 +786,7 @@ app.post("/api/sos", async (req, res) => {
   } catch (err) {
     await pool.query("ROLLBACK");
     console.error("[API] SOS DB Error:", err.message || err);
-    res.status(500).json({ error: "Database query failure." });
+    res.status(500).json({ error: err.message || "Database query failure." });
   }
 });
 

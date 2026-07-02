@@ -4,6 +4,11 @@ async function ensureDatabaseSync() {
   console.log("[SCHEMA SYNC] Ensuring database tables exist...");
   try {
     await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto");
+  } catch (extErr) {
+    console.warn("[SCHEMA SYNC] Could not create pgcrypto extension (likely permission denied). Non-critical, continuing...");
+  }
+
+  try {
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tourists (
@@ -120,21 +125,24 @@ async function ensureDatabaseSync() {
       )
     `);
 
-    // Only do the missing column ALTERS that we did during migration to ensure they exist on clean DBs
+  } catch (err) {
+    console.error("[SCHEMA SYNC] Failed to create some database tables.");
+    console.error(err.message || err);
+  }
+
+  // ALTERS must be guaranteed to run even if table creations above fail (e.g., due to pgcrypto UUID issues)
+  try {
     await pool.query(`ALTER TABLE tourists ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE ai_alerts ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)`);
     
-    // We explicitly drop tourist_name from tourists if it accidentally existed in the deployed DB
     await pool.query(`ALTER TABLE tourists DROP COLUMN IF EXISTS tourist_name`);
     await pool.query(`ALTER TABLE tourists DROP COLUMN IF EXISTS name`);
-
-    console.log("[SCHEMA SYNC] All database tables are present and verified.");
+    
+    console.log("[SCHEMA SYNC] All database columns synchronized.");
   } catch (err) {
-    console.error("[SCHEMA SYNC] Failed to sync database tables.");
-    console.error(err);
-    if (err.stack) console.error(err.stack);
-    if (err.query) console.error(err.query);
+    console.error("[SCHEMA SYNC] Failed to sync column alterations.");
+    console.error(err.message || err);
   }
 }
 
