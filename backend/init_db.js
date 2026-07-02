@@ -106,6 +106,7 @@ async function init() {
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS timestamp VARCHAR(50)`);
     await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Active'`);
+    await client.query(`ALTER TABLE incidents ADD COLUMN IF NOT EXISTS note TEXT`);
     console.log("[DB] Table 'incidents' verified/created.");
 
     await client.query(`

@@ -368,10 +368,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const incidentType = sosLabelMap[state.selectedSosType] || "Emergency";
     
+    const activityNoteNode = document.getElementById("tourist-activity-note");
+    const noteContent = activityNoteNode ? activityNoteNode.value.trim() : "";
+
     const requestPayload = {
       touristId: tourist.id,
       incidentType: incidentType,
-      location: (tourist.activity || "").includes("Hiking") ? "Mountain Ridge Coordinates" : "Coastal Bay Zone"
+      location: (tourist.activity || "").includes("Hiking") ? "Mountain Ridge Coordinates" : "Coastal Bay Zone",
+      note: noteContent
     };
 
     const sendSosRequest = (payload) => {

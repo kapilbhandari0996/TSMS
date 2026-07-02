@@ -204,11 +204,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const tourist = state.tourists.find(t => t.id === inc.touristId);
       const batteryStr = tourist ? `🔋 ${tourist.battery}%` : "";
       const bpmStr = tourist ? `❤️ ${tourist.heartRate} bpm` : "";
+
+      // Dynamic translation mappings for incident types
+      let mappedType = inc.type;
+      if (inc.type === "Medical Emergency") mappedType = dict.sosMedical || inc.type;
+      else if (inc.type === "Accident / Crash") mappedType = dict.sosAccident || inc.type;
+      else if (inc.type === "Security Threat / Theft") mappedType = dict.sosSecurity || inc.type;
+      else if (inc.type === "Other Danger") mappedType = dict.sosOther || inc.type;
       
+      const noteHtml = inc.note ? `<div style="margin-top: 8px; padding: 6px; background: rgba(255,255,255,0.05); border-left: 2px solid var(--danger); font-size: 11px;"><strong>Note:</strong> ${inc.note}</div>` : "";
+
       return `
         <div class="sos-incident-card">
           <div class="sos-incident-header">
-            <span class="sos-incident-type">🚨 ${inc.type}</span>
+            <span class="sos-incident-type">🚨 ${mappedType}</span>
             <span class="sos-incident-time">${inc.timestamp && inc.timestamp.includes('T') ? new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : inc.timestamp}</span>
           </div>
           <div class="sos-incident-body">
@@ -217,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <span style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
                 ID: ${inc.touristId} | Loc: ${inc.location}
               </span>
+              ${noteHtml}
             </div>
             <div style="text-align: right; font-size: 11px; font-weight: 500;">
               <span>${bpmStr}</span><br/>
@@ -372,13 +382,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tableBody.innerHTML = filteredTourists.map(t => {
+      let mappedActivity = t.activity || "";
+      if (mappedActivity.startsWith("Resting / At Hotel")) mappedActivity = mappedActivity.replace("Resting / At Hotel", dict.actResting || "Resting / At Hotel");
+      else if (mappedActivity.startsWith("City Walk / Sightseeing")) mappedActivity = mappedActivity.replace("City Walk / Sightseeing", dict.actExploring || "City Walk / Sightseeing");
+      else if (mappedActivity.startsWith("Mountain Trekking / Hiking")) mappedActivity = mappedActivity.replace("Mountain Trekking / Hiking", dict.actHiking || "Mountain Trekking / Hiking");
+      else if (mappedActivity.startsWith("Water Sports / Swimming")) mappedActivity = mappedActivity.replace("Water Sports / Swimming", dict.actSwimming || "Water Sports / Swimming");
+      else if (mappedActivity.startsWith("In Transit / Driving")) mappedActivity = mappedActivity.replace("In Transit / Driving", dict.actTransit || "In Transit / Driving");
+      else if (mappedActivity.startsWith("In Distress (")) {
+        // e.g. "In Distress (Accident / Crash)"
+        let actType = "Emergency";
+        if (mappedActivity.includes("Medical Emergency")) actType = dict.sosMedical || "Medical Emergency";
+        else if (mappedActivity.includes("Accident / Crash")) actType = dict.sosAccident || "Accident / Crash";
+        else if (mappedActivity.includes("Security Threat")) actType = dict.sosSecurity || "Security Threat / Theft";
+        else if (mappedActivity.includes("Other Danger")) actType = dict.sosOther || "Other Danger";
+        mappedActivity = `${dict.statusDistress || "In Distress"} (${actType})`;
+      }
+
+      let mappedStatus = t.status;
+      if (t.status === "Safe") mappedStatus = dict.statusSafe || "Safe";
+      else if (t.status === "Distress") mappedStatus = dict.statusDistress || "In Distress";
+      else if (t.status === "Warning") mappedStatus = dict.statusWarning || "AI Warning";
+      else if (t.status === "Inactive") mappedStatus = dict.statusInactive || "Inactive";
+
       return `
         <tr>
           <td><strong>${t.id}</strong></td>
           <td>${t.fullName}</td>
           <td>${t.nationality}</td>
-          <td>${t.activity}</td>
-          <td><span class="status-badge ${t.status}">${t.status}</span></td>
+          <td>${mappedActivity}</td>
+          <td><span class="status-badge ${t.status}">${mappedStatus}</span></td>
           <td>
             <button class="btn-icon view-details-btn" data-tourist-id="${t.id}" title="View Details">🔍</button>
             <button class="btn-icon delete-tourist-btn" data-tourist-id="${t.id}" title="Delete Tourist" style="color: var(--danger);">🗑️</button>

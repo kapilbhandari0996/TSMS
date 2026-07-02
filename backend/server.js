@@ -753,7 +753,7 @@ app.post("/api/tourists/:id/activity", async (req, res) => {
 
 // Trigger SOS
 app.post("/api/sos", async (req, res) => {
-  const { touristId, incidentType, location } = req.body;
+  const { touristId, incidentType, location, note } = req.body;
   try {
     const q = await pool.query("SELECT * FROM tourists WHERE id = $1", [touristId]);
     if (q.rowCount === 0) return res.status(404).json({ error: "Tourist not found." });
@@ -769,8 +769,8 @@ app.post("/api/sos", async (req, res) => {
       [`In Distress (${incidentType})`, touristId]);
       
     // Include tourist_name to fix schema mismatches on older DB versions and omit created_at
-    await pool.query("INSERT INTO incidents (id, tourist_id, full_name, tourist_name, type, location, timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active')",
-      [incId, touristId, safeName, safeName, incidentType, loc, timestamp]);
+    await pool.query("INSERT INTO incidents (id, tourist_id, full_name, tourist_name, type, location, timestamp, status, note) VALUES ($1,$2,$3,$4,$5,$6,$7,'Active',$8)",
+      [incId, touristId, safeName, safeName, incidentType, loc, timestamp, note || ""]);
     await pool.query("COMMIT");
 
     console.log(`[API] SOS TRIGGERED: ${safeName} (${touristId}) - ${incidentType}`);
