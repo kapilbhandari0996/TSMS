@@ -645,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderSosQueue() {
     const queueFeed = document.getElementById("sos-alert-feed");
     const activeIncidents = state.incidents.filter(i => i.status === "Active");
-    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage];
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
 
     if (activeIncidents.length === 0) {
       queueFeed.innerHTML = `
@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
              t.nationality.toLowerCase().includes(searchVal);
     });
 
-    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage];
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
 
     tableBody.innerHTML = filteredTourists.map(t => {
       let mappedActivity = t.activity || "";

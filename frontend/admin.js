@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderSosQueue() {
     const queueFeed = document.getElementById("sos-alert-feed");
     const activeIncidents = state.incidents.filter(i => i.status === "Active");
-    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage];
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
 
     if (activeIncidents.length === 0) {
       queueFeed.innerHTML = `
@@ -363,6 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderTouristDirectoryTable() {
     const tableBody = document.getElementById("registry-table-body");
     const searchVal = document.getElementById("tourist-search").value.toLowerCase();
+    const dict = window.TSMS_MOCK_DATA.translations[state.currentLanguage] || window.TSMS_MOCK_DATA.translations["en"];
     
     const filteredTourists = state.tourists.filter(t => {
       return t.fullName.toLowerCase().includes(searchVal) ||
